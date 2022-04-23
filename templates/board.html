@@ -3,24 +3,31 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="static/img/favicon.png"/>
+
+    <link rel="icon" type="image/png" href="/static/media/favicon.png"/>
     <link rel="stylesheet"
           href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
           crossorigin="anonymous">
+
     <style>
+
         .aligncenter {
             text-align: center;
         }
+
         .boardspadding {
             padding: 5%;
         }
-        .posthead {
-            padding-left: 10%;
-        }
+
         .postmargin {
             margin-bottom: 2%;
         }
+
+        .posttext {
+            text-indent: 15 px;
+        }
+
         .loginform {
             margin-left: auto;
             margin-right: auto;
@@ -30,7 +37,9 @@
             border-radius: 5px;
             padding: 1%;
         }
+
     </style>
+
     <title>Протонач — /{{ board.name }}/</title>
 </head>
 
@@ -38,66 +47,84 @@
     <header>
 
         <div class="alert alert-info" role="alert">
-            <a href="http://192.168.1.70:5000/">
+            <a href="/">
                 <h2>Протонач</h2>
             </a>
             <h1 class="aligncenter">/{{ board.name }}/ — {{ board.full_name }}</h1>
             <h3 class="aligncenter">{{ board.about }}</h3>
         </div>
 
-        <h1 class="aligncenter">Создать тред</h1>
-        <form class="loginform" method="post" enctype=multipart/form-data>
-            <div class="form-group">
-                <label for="topic">Введите тему</label>
-                <textarea class="form-control" id="topic" rows="3" name="topic"></textarea>
-            </div>
-            <div class="form-group">
-                <label for="text">Введите текст</label>
-                <textarea class="form-control" id="text" rows="3" name="text"></textarea>
-            </div>
-            <div class="form-group">
-                <label for="file">Приложите фотографию</label>
-                <input type=file class="form-control-file" id="file" name="file">
-            </div>
+    </header>
 
-            <button type="submit" class="btn btn-primary">Отправить</button>
-        </form>
-
-        {% if posts_count %}
-
-            <div class="boardspadding">
-
-                <h1 class="padding">
-                    Посты:
-                </h1>
-
-                <div class="postmargin">
-
-                    <ol class="list-group list-group-numbered">
-
-                    {% for post in posts %}
-
-                        <li class="list-group-item d-flex justify-content-between align-items-start">
-                            <div class="ms-2 me-auto">
-                                <div class="fw-bold">
-                                    <p class="posthead">Аноним, {{ post.time }}, №{{ post.id }}</p>
-                                </div>
-                                <b>{{ post.topic }}</b><br>
-                                {{ post.text }}<br>
-                                <a href="http://192.168.1.70:5000/{{board.name}}/{{post.id}}">Войти в пост</a>
-                            </div>
-                        </li>
-
-                    {% endfor %}
-
-                    </ol>
-
+    <h1 class="aligncenter">Создать тред</h1>
+            <form class="loginform" method="post" enctype=multipart/form-data>
+                <div class="form-group">
+                    <label for="topic">Введите тему</label>
+                    <textarea class="form-control" id="topic" rows="1" name="topic"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="text">Введите текст</label>
+                    <textarea class="form-control" id="text" rows="3" name="text"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="file">Приложите фотографию</label>
+                    <input type=file class="form-control-file" id="file" name="file">
                 </div>
 
+                <button type="submit" class="btn btn-primary">Отправить</button>
+            </form>
+
+    {% if posts_count %}
+
+    <div class="boardspadding">
+
+        <h1 class="padding">
+            Посты:
+        </h1>
+
+        {% for post in posts %}
+
+        <div class="postmargin">
+
+            <div class="alert alert-info" role="alert">
+
+                <div class="fw-bold">
+                    <p>Аноним, {{ post.time }}, №{{ post.id }}</p>
+                </div>
+
+                <div class="fw-bold">
+                    <h2>{{ post.topic }}</h2>
+                </div>
+
+                {% if post.media %}
+
+                    {% if post.media_type in ['png', 'jpg', 'jpeg', 'gif'] %}
+                        <a href="/static/media/from_users/{{ post.media }}">
+                            <img src="/static/media/from_users/{{ post.media }}" width="128" height="128">
+                        </a><br>
+                    {% elif post.media_type in ['webm', 'mp4'] %}
+                        <video controls src="/static/media/from_users/{{ post.media }}" width="512" height="288"></video>
+                    {% elif post.media_type in ['wav', 'mp3'] %}
+                        <audio controls src="/static/media/from_users/{{ post.media }}"></audio>
+                    {% endif %}
+
+                {% endif %}
+
+                <div class="posttext">
+                    <p>{{ post.text }}</p><br>
+                </div>
+
+                <a href="/{{board.name}}/{{post.id}}">Войти в тред</a>
+
             </div>
 
-        {% endif %}
+            {% endfor %}
 
-    </header>
+        </div>
+
+    </div>
+
+    {% endif %}
+
 </body>
 </html>

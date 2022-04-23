@@ -3,16 +3,21 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="static/img/favicon.png"/>
+
+    <link rel="icon" type="image/png" href="/static/media/favicon.png"/>
     <link rel="stylesheet"
           href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
           crossorigin="anonymous">
+
     <style>
+
         .aligncenter {
             text-align: center;
         }
+
     </style>
+
     <title>Протонач</title>
 </head>
 
@@ -20,21 +25,21 @@
     <header>
 
         <div class="alert alert-info" role="alert">
-            <a href="http://192.168.1.70:5000/">
+            <a href="/">
                 <h1 class="aligncenter">Протонач</h1>
             </a>
         </div>
 
-        <div class="alert alert-danger" role="alert">
-            <h1 class="aligncenter">404</h1>
-            <h3 class="aligncenter">К сожалению, данный материал больше недоступен или его не существует.</h3>
-        </div>
-
-        <p class="aligncenter">
-            {% set pic = ["crab-rave.gif", "anon.png"]|random %}
-            <img src="static/img/{{ pic }}">
-        </p>
-
     </header>
+
+    <div class="alert alert-danger" role="alert">
+        <h1 class="aligncenter">404</h1>
+        <h3 class="aligncenter">К сожалению, данный материал больше недоступен или его не существует.</h3>
+    </div>
+
+    <p class="aligncenter">
+        {% set pic = ["crab-rave.gif", "anon.png"]|random %}
+        <img src="/static/media/{{ pic }}">
+    </p>
 </body>
 </html>

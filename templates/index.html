@@ -3,19 +3,26 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="static/img/favicon.png"/>
+
+    <link rel="icon" type="image/png" href="/static/media/favicon.png"/>
     <link rel="stylesheet"
           href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
           crossorigin="anonymous">
+
     <style>
+
         .aligncenter {
             text-align: center;
         }
+
         .boardspadding {
             padding: 5%;
+            background-color: #d1ecf1;
         }
+
     </style>
+
     <title>Протонач</title>
 </head>
 
@@ -26,44 +33,51 @@
             <h1 class="aligncenter">Протонач</h1>
         </div>
 
-        <p class="aligncenter">
-            Добро пожаловать на Протонач! Здесь люди могут общаться анонимно на разные тематики.
-        </p>
+    </header>
 
-        <p class="aligncenter">
-            Чтобы одни не мешали другим, на каждую тематику созданы так называемые "доски" — отдельные страницы сайта, где пользователи создают "треды" — обсуждения чего-то конкретного.
-        </p>
+    <p class="aligncenter">
+        Добро пожаловать на Протонач! Здесь люди могут общаться анонимно на разные тематики.
+    </p>
 
-        <p class="aligncenter">
-            {% if boards_count % 10 == 0 or boards_count % 10 >= 5 %}
-                На данный момент открыто {{ boards_count }} досок.
-            {% elif boards_count % 10 == 1 %}
-                На данный момент открыта {{ boards_count }} доска.
-            {% else %}
-                На данный момент открыто {{ boards_count }} доски.
-            {% endif %}
-        </p>
+    <p class="aligncenter">
+        Чтобы одни не мешали другим, на каждую тематику созданы так называемые "доски" — отдельные страницы сайта, где пользователи создают "треды" — обсуждения чего-то конкретного.
+    </p>
 
-        <p class="aligncenter">
-            <img src="static/img/anon.png" width="218" height="286">
-        </p>
+    <p class="aligncenter">
 
-        {% if boards_count %}
+        {% if boards_count % 10 == 0 or boards_count % 10 >= 5 %}
+        На данный момент открыто {{ boards_count }} досок.
 
-            <div class="boardspadding">
+        {% elif boards_count % 10 == 1 %}
+        На данный момент открыта {{ boards_count }} доска.
 
-                <h1 class="padding">
-                    Доски:
-                </h1>
+        {% else %}
+        На данный момент открыто {{ boards_count }} доски.
 
-                <ol class="list-group list-group-numbered">
+        {% endif %}
+
+    </p>
+
+    <p class="aligncenter">
+        <img src="/static/media/anon.png" width="218" height="286">
+    </p>
+
+    {% if boards_count %}
+
+        <div class="boardspadding">
+
+            <h1 class="padding">
+                Доски:
+            </h1>
+
+            <ol class="list-group list-group-numbered">
 
                 {% for board in boards %}
 
                     <li class="list-group-item d-flex justify-content-between align-items-start">
                         <div class="ms-2 me-auto">
                             <div class="fw-bold">
-                                <a href="http://192.168.1.70:5000/{{ board.name }}">/{{ board.name }}/</a>
+                                <a href="/{{ board.name }}">/{{ board.name }}/</a>
                             </div>
                             {{ board.full_name }}
                         </div>
@@ -71,11 +85,9 @@
 
                 {% endfor %}
 
-                </ol>
-            </div>
+            </ol>
+        </div>
 
-        {% endif %}
-
-    </header>
+    {% endif %}
 </body>
 </html>
