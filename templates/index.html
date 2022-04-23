@@ -3,11 +3,19 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="static/css/index.css">
+    <link rel="icon" type="image/png" href="static/img/favicon.png"/>
     <link rel="stylesheet"
           href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
           crossorigin="anonymous">
+    <style>
+        .aligncenter {
+            text-align: center;
+        }
+        .boardspadding {
+            padding: 5%;
+        }
+    </style>
     <title>Протонач</title>
 </head>
 
@@ -15,7 +23,7 @@
     <header>
 
         <div class="alert alert-info" role="alert">
-            <h1>Протонач</h1>
+            <h1 class="aligncenter">Протонач</h1>
         </div>
 
         <p class="aligncenter">
@@ -27,18 +35,47 @@
         </p>
 
         <p class="aligncenter">
-            На данный момент открыто {{ boards_count }} досок.
+            {% if boards_count % 10 == 0 or boards_count % 10 >= 5 %}
+                На данный момент открыто {{ boards_count }} досок.
+            {% elif boards_count % 10 == 1 %}
+                На данный момент открыта {{ boards_count }} доска.
+            {% else %}
+                На данный момент открыто {{ boards_count }} доски.
+            {% endif %}
         </p>
 
         <p class="aligncenter">
             <img src="static/img/anon.png" width="218" height="286">
         </p>
 
-        <style>
-            .aligncenter {
-            text-align: center;
-            }
-        </style>
+        {% if boards_count %}
+
+            <div class="boardspadding">
+
+                <h1 class="padding">
+                    Доски:
+                </h1>
+
+                <ol class="list-group list-group-numbered">
+
+                {% for board in boards %}
+
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">
+                                <a href="http://192.168.1.70:5000/{{ board.name }}">/{{ board.name }}/</a>
+                            </div>
+                            {{ board.full_name }}
+                        </div>
+                    </li>
+
+                {% endfor %}
+
+                </ol>
+            </div>
+
+        {% endif %}
+
     </header>
 </body>
 </html>

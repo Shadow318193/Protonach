@@ -1,1 +1,1 @@
-from . import boards
+from . import boards, posts
