@@ -33,9 +33,10 @@
             margin-right: auto;
             max-width: 450px;
             background-color: #d1ecf1;
-            border: 1px solid gray;
+            border: 1px solid #bee5eb;
             border-radius: 5px;
             padding: 1%;
+            color: #0c5460;
         }
 
     </style>
@@ -67,64 +68,70 @@
                     <textarea class="form-control" id="text" rows="3" name="text"></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="file">Приложите фотографию</label>
+                    <label for="file">Приложите медиафайл</label>
                     <input type=file class="form-control-file" id="file" name="file">
                 </div>
 
                 <button type="submit" class="btn btn-primary">Отправить</button>
             </form>
 
-    {% if posts_count %}
-
     <div class="boardspadding">
 
-        <h1 class="padding">
-            Посты:
-        </h1>
+        {% if posts_count %}
 
-        {% for post in posts %}
+            <h1 class="padding">
+                Посты:
+            </h1>
 
-        <div class="postmargin">
+            {% for post in posts %}
 
-            <div class="alert alert-info" role="alert">
+            <div class="postmargin">
 
-                <div class="fw-bold">
-                    <p>Аноним, {{ post.time }}, №{{ post.id }}</p>
-                </div>
+                <div class="alert alert-info" role="alert">
 
-                <div class="fw-bold">
-                    <h2>{{ post.topic }}</h2>
-                </div>
+                    <div class="fw-bold">
+                        <p>Аноним, {{ post.time }}, №{{ post.id }}</p>
+                    </div>
 
-                {% if post.media %}
+                    <div class="fw-bold">
+                        <h2>{{ post.topic }}</h2>
+                    </div>
 
-                    {% if post.media_type in ['png', 'jpg', 'jpeg', 'gif'] %}
-                        <a href="/static/media/from_users/{{ post.media }}">
-                            <img src="/static/media/from_users/{{ post.media }}" width="128" height="128">
-                        </a><br>
-                    {% elif post.media_type in ['webm', 'mp4'] %}
-                        <video controls src="/static/media/from_users/{{ post.media }}" width="512" height="288"></video>
-                    {% elif post.media_type in ['wav', 'mp3'] %}
-                        <audio controls src="/static/media/from_users/{{ post.media }}"></audio>
+                    {% if post.media %}
+
+                        {% if post.media_type in ['png', 'jpg', 'jpeg', 'gif'] %}
+                            <a href="/static/media/from_users/{{ post.media }}">
+                                <img src="/static/media/from_users/{{ post.media }}" width="128" height="128">
+                            </a><br>
+                        {% elif post.media_type in ['webm', 'mp4'] %}
+                            <video controls src="/static/media/from_users/{{ post.media }}" width="512" height="288"></video>
+                        {% elif post.media_type in ['wav', 'mp3'] %}
+                            <audio controls src="/static/media/from_users/{{ post.media }}"></audio>
+                        {% endif %}
+
                     {% endif %}
 
-                {% endif %}
+                    <div class="posttext">
+                        <p>{{ post.text }}</p><br>
+                    </div>
 
-                <div class="posttext">
-                    <p>{{ post.text }}</p><br>
+                    <a href="/{{board.name}}/{{post.id}}">Войти в тред</a>
+
                 </div>
 
-                <a href="/{{board.name}}/{{post.id}}">Войти в тред</a>
+                {% endfor %}
 
             </div>
 
-            {% endfor %}
+        {% else %}
 
-        </div>
+            <h1 class="aligncenter">
+                Тредов в этой доске нет. Можете стать первопроходцем.
+            </h1>
+
+        {% endif %}
 
     </div>
-
-    {% endif %}
 
 </body>
 </html>

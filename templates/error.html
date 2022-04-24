@@ -33,12 +33,12 @@
     </header>
 
     <div class="alert alert-danger" role="alert">
-        <h1 class="aligncenter">404</h1>
-        <h3 class="aligncenter">К сожалению, данный материал больше недоступен или его не существует.</h3>
+        <h1 class="aligncenter">{{ code }}</h1>
+        <h3 class="aligncenter">{{ text }}</h3>
     </div>
 
     <p class="aligncenter">
-        {% set pic = ["crab-rave.gif", "anon.png"]|random %}
+        {% set pic = pics|random %}
         <img src="/static/media/{{ pic }}">
     </p>
 </body>
