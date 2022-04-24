@@ -24,10 +24,6 @@
             margin-bottom: 2%;
         }
 
-        .posttext {
-            text-indent: 15 px;
-        }
-
         .loginform {
             margin-left: auto;
             margin-right: auto;
@@ -89,31 +85,26 @@
 
                 <div class="alert alert-info" role="alert">
 
-                    <div class="fw-bold">
-                        <p>Аноним, {{ post.time }}, №{{ post.id }}</p>
-                    </div>
+                    <p>Аноним, {{ post.time }}, №{{ post.id }}</p>
 
-                    <div class="fw-bold">
-                        <h2>{{ post.topic }}</h2>
-                    </div>
+                    <h2>{{ post.topic }}</h2>
 
                     {% if post.media %}
 
                         {% if post.media_type in ['png', 'jpg', 'jpeg', 'gif'] %}
                             <a href="/static/media/from_users/{{ post.media }}">
-                                <img src="/static/media/from_users/{{ post.media }}" width="128" height="128">
+                                <img src="/static/media/from_users/{{ post.media }}" width="256">
                             </a><br>
                         {% elif post.media_type in ['webm', 'mp4'] %}
-                            <video controls src="/static/media/from_users/{{ post.media }}" width="512" height="288"></video>
+                            <video controls src="/static/media/from_users/{{ post.media }}" width="256"></video>
                         {% elif post.media_type in ['wav', 'mp3'] %}
                             <audio controls src="/static/media/from_users/{{ post.media }}"></audio>
                         {% endif %}
+                        <br>
 
                     {% endif %}
 
-                    <div class="posttext">
-                        <p>{{ post.text }}</p><br>
-                    </div>
+                    <p>{{ post.text }}</p>
 
                     <a href="/{{board.name}}/{{post.id}}">Войти в тред</a>
 
@@ -132,6 +123,8 @@
         {% endif %}
 
     </div>
+
+    <h3 class="aligncenter">Не забывайте обновлять страницу, чтобы была возможность увидеть новые посты.</h3>
 
 </body>
 </html>

@@ -130,3 +130,5 @@ dmypy.json
 
 # Another files
 ngrok.exe
+static/media/from_users/*
+db/imageboard.db

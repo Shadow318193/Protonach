@@ -28,10 +28,6 @@
             margin-bottom: 2%;
         }
 
-        .posttext {
-            text-indent: 15 px;
-        }
-
         .loginform {
             margin-left: auto;
             margin-right: auto;
@@ -59,9 +55,9 @@
             <h3 class="aligncenter">{{ board.about }}</h3>
         </div>
 
-        <h1 class="aligncenter">Тред-пост №{{ the_post.id }}</h1>
-
     </header>
+
+    <h1 class="aligncenter">Тред-пост №{{ the_post.id }}</h1>
 
     <div class="boardspadding">
 
@@ -69,31 +65,26 @@
 
             <div class="alert alert-info" role="alert">
 
-                <div class="fw-bold">
-                    <p>Аноним, {{ the_post.time }}, №{{ the_post.id }}</p>
-                </div>
+                <p>Аноним, {{ the_post.time }}, №{{ the_post.id }}</p>
 
-                <div class="fw-bold">
-                    <h2>{{ the_post.topic }}</h2>
-                </div>
+                <h2>{{ the_post.topic }}</h2>
 
                 {% if the_post.media %}
 
                     {% if the_post.media_type in ['png', 'jpg', 'jpeg', 'gif'] %}
                         <a href="/static/media/from_users/{{ the_post.media }}">
-                            <img src="/static/media/from_users/{{ the_post.media }}" width="128" height="128">
+                            <img src="/static/media/from_users/{{ the_post.media }}" width="256">
                         </a><br>
                     {% elif the_post.media_type in ['webm', 'mp4'] %}
-                        <video controls src="/static/media/from_users/{{ the_post.media }}" width="512" height="288"></video>
+                        <video controls src="/static/media/from_users/{{ the_post.media }}" width="256"></video>
                     {% elif the_post.media_type in ['wav', 'mp3'] %}
                         <audio controls src="/static/media/from_users/{{ the_post.media }}"></audio>
                     {% endif %}
+                    <br>
 
                 {% endif %}
 
-                <div class="posttext">
-                    <p>{{ the_post.text }}</p><br>
-                </div>
+                <p>{{ the_post.text }}</p>
 
             </div>
 
@@ -101,52 +92,57 @@
 
         {% if posts_count %}
 
-        {% for post in posts %}
-
             <div class="childpost">
-                <div class="postmargin">
 
-                    <div class="alert alert-info" role="alert">
+                <h3>Ответы:</h3>
 
-                        <div class="fw-bold">
+                {% for post in posts %}
+
+                    <div class="postmargin">
+
+                        <div class="alert alert-info" role="alert">
+
                             <p>Аноним, {{ post.time }}, №{{ post.id }}</p>
-                        </div>
 
-                        <div class="fw-bold">
                             <h2>{{ post.topic }}</h2>
-                        </div>
 
-                        {% if post.media %}
+                            {% if post.media %}
 
-                        {% if post.media_type in ['png', 'jpg', 'jpeg', 'gif'] %}
-                            <a href="/static/media/from_users/{{ post.media }}">
-                                <img src="/static/media/from_users/{{ post.media }}" width="128" height="128">
-                            </a><br>
-                        {% elif post.media_type in ['webm', 'mp4'] %}
-                            <video controls src="/static/media/from_users/{{ post.media }}" width="512" height="288"></video>
-                        {% elif post.media_type in ['wav', 'mp3'] %}
-                            <audio controls src="/static/media/from_users/{{ post.media }}"></audio>
-                        {% endif %}
+                            {% if post.media_type in ['png', 'jpg', 'jpeg', 'gif'] %}
+                                <a href="/static/media/from_users/{{ post.media }}">
+                                    <img src="/static/media/from_users/{{ post.media }}" width="256">
+                                </a><br>
+                            {% elif post.media_type in ['webm', 'mp4'] %}
+                                <video controls src="/static/media/from_users/{{ post.media }}" width="256"></video>
+                            {% elif post.media_type in ['wav', 'mp3'] %}
+                                <audio controls src="/static/media/from_users/{{ post.media }}"></audio>
+                            {% endif %}
+                            <br>
 
-                        {% endif %}
+                            {% endif %}
 
-                        <div class="posttext">
-                            <p>{{ post.text }}</p><br>
+                            <p>{{ post.text }}</p>
+
                         </div>
 
                     </div>
 
-                </div>
+                {% endfor %}
 
             </div>
 
-        {% endfor %}
+        {% else %}
+
+            <h3>Нет ответов, напишите первым.</h3>
+
+        {% endif %}
 
     </div>
 
-    {% endif %}
+    <h3 class="aligncenter">Не забывайте обновлять страницу, чтобы была возможность увидеть новые посты.</h3>
 
     <h1 class="aligncenter">Ответить в тред</h1>
+
             <form class="loginform" method="post" enctype=multipart/form-data>
                 <div class="form-group">
                     <label for="topic">Введите тему</label>
