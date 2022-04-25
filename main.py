@@ -11,7 +11,7 @@ from data.posts import Posts
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret_key'
-app.config['UPLOAD_FOLDER'] = '/static/media/from_users'
+app.config['UPLOAD_FOLDER'] = 'static/media/from_users'
 app.config['MAX_CONTENT_LENGTH'] = 128 * 1024 * 1024
 
 
