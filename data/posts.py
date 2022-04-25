@@ -12,6 +12,7 @@ class Posts(SqlAlchemyBase):
     text = sqlalchemy.Column(sqlalchemy.Text, nullable=True)
     media = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     media_type = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    media_name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     board_name = sqlalchemy.Column(sqlalchemy.String, sqlalchemy.ForeignKey("boards.name"))
     parent_post = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
     time = sqlalchemy.Column(sqlalchemy.DateTime)

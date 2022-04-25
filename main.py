@@ -1,8 +1,6 @@
 from flask import Flask, request, render_template, redirect
-from werkzeug.utils import secure_filename
 
 import os
-import random
 import datetime
 
 from data import db_session
@@ -14,10 +12,15 @@ app.config['SECRET_KEY'] = 'secret_key'
 app.config['UPLOAD_FOLDER'] = 'static/media/from_users'
 app.config['MAX_CONTENT_LENGTH'] = 128 * 1024 * 1024
 
+image_files = ["png", "jpg", "jpeg", "gif"]
+video_files = ["webm", "mp4"]
+sound_files = ["mp3", "wav"]
+
+allowed_files = image_files + video_files + sound_files
 
 def allowed_file(filename):
     return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ['png', 'jpg', 'jpeg', 'gif', 'webm', 'mp4', 'mp3', 'wav']
+           filename.rsplit('.', 1)[1].lower() in allowed_files
 
 
 @app.route("/")
@@ -35,7 +38,8 @@ def board_url(board_name):
         for board_obj in board_select:
             posts = db_sess.query(Posts).filter(Posts.board_name == board_obj.name,
                                                 Posts.parent_post == None)
-            return render_template("board.html", board=board_obj, posts=posts, posts_count=posts.count())
+            return render_template("board.html", board=board_obj, posts=posts, posts_count=posts.count(),
+                                   image_files=image_files, video_files=video_files, sound_files=sound_files)
         return render_template("error.html", code=404,
                                text="К сожалению, данная доска больше недоступна или её не существует.",
                                pics=["crab-rave.gif", "anon.png"])
@@ -46,13 +50,13 @@ def board_url(board_name):
         post.topic = request.form["topic"]
         post.text = request.form["text"]
         file = request.files["file"]
-        print(file.filename)
         if file and allowed_file(file.filename):
             filename = str(t).replace(" ", "-").replace(".", "-").replace(":", "-").lower() + \
                        "." + file.filename.rsplit('.', 1)[1].lower()
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             post.media = filename
             post.media_type = filename.rsplit('.', 1)[1].lower()
+            post.media_name = file.filename
         post.board_name = board_name
         db_sess = db_session.create_session()
         db_sess.add(post)
@@ -72,7 +76,8 @@ def post_url(board_name, post_id):
             for post_obj in post_select:
                 posts = db_sess.query(Posts).filter(Posts.parent_post == post_id)
                 return render_template("post.html", board=board_obj, the_post=post_obj, posts=posts,
-                                       posts_count=posts.count())
+                                       posts_count=posts.count(), image_files=image_files, video_files=video_files,
+                                       sound_files=sound_files)
         return render_template("error.html", code=404,
                                text="К сожалению, данный тред больше недоступен или его не существует.",
                                pics=["crab-rave.gif", "anon.png"])
@@ -84,13 +89,13 @@ def post_url(board_name, post_id):
         post.topic = request.form["topic"]
         post.text = request.form["text"]
         file = request.files["file"]
-        print(file.filename)
         if file and allowed_file(file.filename):
             filename = str(t).replace(" ", "-").replace(".", "-").replace(":", "-").lower() + \
                        "." + file.filename.rsplit('.', 1)[1].lower()
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             post.media = filename
             post.media_type = filename.rsplit('.', 1)[1].lower()
+            post.media_name = file.filename
         post.board_name = board_name
         db_sess = db_session.create_session()
         db_sess.add(post)

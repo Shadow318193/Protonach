@@ -65,13 +65,15 @@
 
                     {% if post.media %}
 
-                        {% if post.media_type in ['png', 'jpg', 'jpeg', 'gif'] %}
+                        <i>{{ post.media_name }}</i><br>
+
+                        {% if post.media_type in image_files %}
                             <a href="/static/media/from_users/{{ post.media }}">
                                 <img src="/static/media/from_users/{{ post.media }}" width="256">
                             </a><br>
-                        {% elif post.media_type in ['webm', 'mp4'] %}
+                        {% elif post.media_type in video_files %}
                             <video controls src="/static/media/from_users/{{ post.media }}" width="256"></video>
-                        {% elif post.media_type in ['wav', 'mp3'] %}
+                        {% elif post.media_type in sound_files %}
                             <audio controls src="/static/media/from_users/{{ post.media }}"></audio>
                         {% endif %}
                         <br>
@@ -80,7 +82,7 @@
 
                     <p>{{ post.text }}</p>
 
-                    <a href="/{{board.name}}/{{post.id}}">Войти в тред</a>
+                    <b><a href="/{{board.name}}/{{post.id}}">Войти в тред</a></b>
 
                 </div>
 
