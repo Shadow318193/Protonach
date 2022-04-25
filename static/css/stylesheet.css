@@ -6,6 +6,12 @@
     padding: 5%;
 }
 
+.boardslist {
+    padding: 5%;
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+}
+
 .childpost {
     padding-left: 10%;
 }
