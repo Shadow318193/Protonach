@@ -1,0 +1,26 @@
+.aligncenter {
+    text-align: center;
+}
+
+.boardspadding {
+    padding: 5%;
+}
+
+.childpost {
+    padding-left: 10%;
+}
+
+.postmargin {
+    margin-bottom: 2%;
+}
+
+.loginform {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 450px;
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+    border-radius: 5px;
+    padding: 1%;
+    color: #0c5460;
+}
