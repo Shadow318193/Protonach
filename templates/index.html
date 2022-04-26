@@ -24,23 +24,23 @@
     </header>
 
     <p class="aligncenter">
-        Добро пожаловать на Протонач! Здесь люди могут общаться анонимно на разные тематики.
+        Добро пожаловать на <b>Протонач</b>! Здесь люди могут общаться анонимно на разные тематики.
     </p>
 
     <p class="aligncenter">
-        Чтобы одни не мешали другим, на каждую тематику созданы так называемые "доски" — отдельные страницы сайта, где пользователи создают "треды" — обсуждения чего-то конкретного.
+        Чтобы одни не мешали другим, на каждую тематику созданы так называемые <b>"доски"</b> — отдельные страницы сайта, где пользователи создают <b>"треды"</b> — обсуждения чего-то конкретного.
     </p>
 
     <p class="aligncenter">
 
         {% if boards_count % 10 == 0 or boards_count % 10 >= 5 %}
-        На данный момент открыто {{ boards_count }} досок.
+        На данный момент открыто <b>{{ boards_count }}</b> досок.
 
         {% elif boards_count % 10 == 1 %}
-        На данный момент открыта {{ boards_count }} доска.
+        На данный момент открыта <b>{{ boards_count }}</b> доска.
 
         {% else %}
-        На данный момент открыты {{ boards_count }} доски.
+        На данный момент открыты <b>{{ boards_count }}</b> доски.
 
         {% endif %}
 
@@ -65,7 +65,7 @@
                 <div class="ms-2 me-auto">
                     <a href="/{{ board.name }}">
                         <button type="button" class="list-group-item list-group-item-action">
-                            /{{ board.name }}/ — {{ board.full_name }}
+                            <b>/{{ board.name }}/</b> — {{ board.full_name }}
                             <span class="badge bg-info rounded-pill">
                                 {% if posts[board.name] % 10 == 0 or posts[board.name] % 10 >= 5 %}
                                 <div class="whitetext">{{ posts[board.name] }} постов</div>
