@@ -69,7 +69,8 @@
 
                         {% if post.media_type in image_files %}
                             <a href="/static/media/from_users/{{ post.media }}">
-                                <img src="/static/media/from_users/{{ post.media }}" height="192">
+                                <img src="/static/media/from_users/{{ post.media }}" height="192"
+                                     alt="{{ post.media_name }}">
                             </a><br>
                         {% elif post.media_type in video_files %}
                             <video controls src="/static/media/from_users/{{ post.media }}" height="192"></video>
@@ -85,7 +86,13 @@
                     <div class="ms-2 me-auto">
                         <b><a href="/{{board.name}}/{{post.id}}">Войти в тред</a></b>
                         <span class="badge bg-info rounded-pill">
-                            <div class="whitetext">{{ post_answers[post.id] }}</div>
+                            {% if post_answers[post.id] % 10 == 0 or post_answers[post.id] % 10 >= 5 %}
+                            <div class="whitetext">{{ post_answers[post.id] }} ответов</div>
+                            {% elif post_answers[post.id] % 10 == 1 %}
+                            <div class="whitetext">{{ post_answers[post.id] }} ответ</div>
+                            {% else %}
+                            <div class="whitetext">{{ post_answers[post.id] }} ответа</div>
+                            {% endif %}
                         </span>
                     </div>
 

@@ -67,7 +67,13 @@
                         <button type="button" class="list-group-item list-group-item-action">
                             /{{ board.name }}/ — {{ board.full_name }}
                             <span class="badge bg-info rounded-pill">
-                                <div class="whitetext">{{ posts[board.name] }}</div>
+                                {% if posts[board.name] % 10 == 0 or posts[board.name] % 10 >= 5 %}
+                                <div class="whitetext">{{ posts[board.name] }} постов</div>
+                                {% elif posts[board.name] % 10 == 1 %}
+                                <div class="whitetext">{{ posts[board.name] }} пост</div>
+                                {% else %}
+                                <div class="whitetext">{{ posts[board.name] }} поста</div>
+                                {% endif %}
                             </span>
                         </button>
                     </a>

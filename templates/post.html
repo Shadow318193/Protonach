@@ -45,7 +45,8 @@
 
                     {% if the_post.media_type in image_files %}
                         <a href="/static/media/from_users/{{ the_post.media }}">
-                            <img src="/static/media/from_users/{{ the_post.media }}" height="192">
+                            <img src="/static/media/from_users/{{ the_post.media }}" height="192"
+                                alt="{{ the_post.media_name }}">
                         </a><br>
                     {% elif the_post.media_type in video_files %}
                         <video controls src="/static/media/from_users/{{ the_post.media }}" height="192"></video>
@@ -84,7 +85,8 @@
 
                             {% if post.media_type in image_files %}
                                 <a href="/static/media/from_users/{{ post.media }}">
-                                    <img src="/static/media/from_users/{{ post.media }}" height="192">
+                                    <img src="/static/media/from_users/{{ post.media }}" height="192"
+                                        alt="{{ post.media_name }}">
                                 </a><br>
                             {% elif post.media_type in video_files %}
                                 <video controls src="/static/media/from_users/{{ post.media }}" height="192"></video>
