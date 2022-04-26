@@ -58,22 +58,23 @@
                 Доски:
             </h1>
 
-            <ol class="list-group list-group-numbered">
+            <div class="list-group">
 
                 {% for board in boards %}
 
-                    <li class="list-group-item d-flex justify-content-between align-items-start">
-                        <div class="ms-2 me-auto">
-                            <div class="fw-bold">
-                                <a href="/{{ board.name }}">/{{ board.name }}/</a>
-                            </div>
-                            {{ board.full_name }}
-                        </div>
-                    </li>
+                <div class="ms-2 me-auto">
+                    <a href="/{{ board.name }}">
+                        <button type="button" class="list-group-item list-group-item-action">
+                            /{{ board.name }}/ — {{ board.full_name }}
+                            <span class="badge bg-info rounded-pill">
+                                <div class="whitetext">{{ posts[board.name] }}</div>
+                            </span>
+                        </button>
+                    </a>
+                </div>
 
                 {% endfor %}
-
-            </ol>
+            </div>
         </div>
 
     {% endif %}

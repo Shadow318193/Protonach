@@ -12,11 +12,24 @@ app.config['SECRET_KEY'] = 'secret_key'
 app.config['UPLOAD_FOLDER'] = 'static/media/from_users'
 app.config['MAX_CONTENT_LENGTH'] = 128 * 1024 * 1024
 
-image_files = ["png", "jpg", "jpeg", "gif"]
-video_files = ["webm", "mp4"]
-sound_files = ["mp3", "wav"]
+image_files = ["png", "jpg", "jpeg", "gif", "jfif", "pjpeg", "pjp", "jpe"]
+video_files = ["webm", "mp4", "m4v"]
+audio_files = ["mp3", "wav"]
 
-allowed_files = image_files + video_files + sound_files
+allowed_files = image_files + video_files + audio_files
+
+
+def make_accept_for_html(mime):
+    if mime in image_files:
+        return "image/" + mime
+    elif mime in video_files:
+        return "video/" + mime
+    elif mime in audio_files:
+        return "audio/" + mime
+
+
+accept = ",".join([make_accept_for_html(x) for x in allowed_files])
+
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -27,7 +40,10 @@ def allowed_file(filename):
 def index():
     db_sess = db_session.create_session()
     boards = db_sess.query(Boards)
-    return render_template("index.html", boards=boards, boards_count=boards.count())
+    posts = {}
+    for board in boards:
+        posts[board.name] = db_sess.query(Posts).filter(Posts.board_name == board.name).count()
+    return render_template("index.html", boards=boards, boards_count=boards.count(), posts=posts)
 
 
 @app.route("/<board_name>", methods=['POST', 'GET'])
@@ -38,8 +54,12 @@ def board_url(board_name):
         for board_obj in board_select:
             posts = db_sess.query(Posts).filter(Posts.board_name == board_obj.name,
                                                 Posts.parent_post == None)
+            post_answers = {}
+            for post in posts:
+                post_answers[post.id] = db_sess.query(Posts).filter(Posts.parent_post == post.id).count()
             return render_template("board.html", board=board_obj, posts=posts, posts_count=posts.count(),
-                                   image_files=image_files, video_files=video_files, sound_files=sound_files)
+                                   post_answers=post_answers, image_files=image_files, video_files=video_files,
+                                   sound_files=audio_files, accept_files=accept)
         return render_template("error.html", code=404,
                                text="К сожалению, данная доска больше недоступна или её не существует.",
                                pics=["crab-rave.gif", "anon.png"])
@@ -77,7 +97,7 @@ def post_url(board_name, post_id):
                 posts = db_sess.query(Posts).filter(Posts.parent_post == post_id)
                 return render_template("post.html", board=board_obj, the_post=post_obj, posts=posts,
                                        posts_count=posts.count(), image_files=image_files, video_files=video_files,
-                                       sound_files=sound_files)
+                                       sound_files=audio_files, accept_files=accept)
         return render_template("error.html", code=404,
                                text="К сожалению, данный тред больше недоступен или его не существует.",
                                pics=["crab-rave.gif", "anon.png"])
