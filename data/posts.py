@@ -13,8 +13,11 @@ class Posts(SqlAlchemyBase):
     media = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     media_type = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     media_name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    board_name = sqlalchemy.Column(sqlalchemy.String, sqlalchemy.ForeignKey("boards.name"))
+    poster = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    likes = sqlalchemy.Column(sqlalchemy.Integer, default=0)
+    dislikes = sqlalchemy.Column(sqlalchemy.Integer, default=0)
+    board_name = sqlalchemy.Column(sqlalchemy.String, sqlalchemy.ForeignKey("boards.name"), nullable=False)
     parent_post = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
-    time = sqlalchemy.Column(sqlalchemy.DateTime)
+    time = sqlalchemy.Column(sqlalchemy.DateTime, nullable=False)
 
     board = orm.relation("Boards")

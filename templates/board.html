@@ -61,7 +61,9 @@
 
                     <p>Аноним, {{ post.time }}, <b>№{{ post.id }}</b></p>
 
-                    <h2>{{ post.topic }}</h2>
+                    {% if post.topic %}
+                        <h2>{{ post.topic }}</h2>
+                    {% endif %}
 
                     {% if post.media %}
 
@@ -81,7 +83,7 @@
 
                     {% endif %}
 
-                    <p>{{ post.text }}</p>
+                    <pre>{{ post.text }}</pre>
 
                     <div class="ms-2 me-auto">
                         <b><a href="/{{board.name}}/{{post.id}}">Войти в тред</a></b>

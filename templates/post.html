@@ -37,7 +37,9 @@
 
                 <p>Аноним, {{ the_post.time }}, <b>№{{ the_post.id }}</b></p>
 
-                <h2>{{ the_post.topic }}</h2>
+                {% if the_post.topic %}
+                    <h2>{{ the_post.topic }}</h2>
+                {% endif %}
 
                 {% if the_post.media %}
 
@@ -57,7 +59,7 @@
 
                 {% endif %}
 
-                <p>{{ the_post.text }}</p>
+                <pre>{{ the_post.text }}</pre>
 
             </div>
 
@@ -77,7 +79,9 @@
 
                             <p>Аноним, {{ post.time }}, <b>№{{ post.id }}</b></p>
 
-                            <h2>{{ post.topic }}</h2>
+                            {% if post.topic %}
+                                <h2>{{ post.topic }}</h2>
+                            {% endif %}
 
                             {% if post.media %}
 
@@ -97,7 +101,7 @@
 
                             {% endif %}
 
-                            <p>{{ post.text }}</p>
+                            <pre>{{ post.text }}</pre>
 
                         </div>
 

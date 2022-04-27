@@ -12,7 +12,7 @@ app.config['SECRET_KEY'] = 'secret_key'
 app.config['UPLOAD_FOLDER'] = 'static/media/from_users'
 app.config['MAX_CONTENT_LENGTH'] = 128 * 1024 * 1024
 
-image_files = ["png", "jpg", "jpeg", "gif", "jfif", "pjpeg", "pjp", "jpe"]
+image_files = ["png", "jpg", "jpeg", "gif", "jfif", "pjpeg", "pjp", "jpe", "webp"]
 video_files = ["webm", "mp4", "m4v"]
 audio_files = ["mp3", "wav"]
 
@@ -64,6 +64,8 @@ def board_url(board_name):
                                text="К сожалению, данная доска больше недоступна или её не существует.",
                                pics=["crab-rave.gif", "anon.png"])
     elif request.method == 'POST':
+        if not (request.form["topic"] or request.form["text"] or request.files["file"]):
+            return redirect(board_name)
         post = Posts()
         t = datetime.datetime.now()
         post.time = t
@@ -78,10 +80,11 @@ def board_url(board_name):
             post.media_type = filename.rsplit('.', 1)[1].lower()
             post.media_name = file.filename
         post.board_name = board_name
+        post.poster = request.remote_addr
         db_sess = db_session.create_session()
         db_sess.add(post)
         db_sess.commit()
-        return redirect(board_name)
+        return redirect(board_name + "/" + str(post.id))
 
 
 @app.route("/<board_name>/<post_id>", methods=['POST', 'GET'])
@@ -102,6 +105,8 @@ def post_url(board_name, post_id):
                                text="К сожалению, данный тред больше недоступен или его не существует.",
                                pics=["crab-rave.gif", "anon.png"])
     elif request.method == 'POST':
+        if not (request.form["topic"] or request.form["text"] or request.files["file"]):
+            return redirect(post_id)
         post = Posts()
         t = datetime.datetime.now()
         post.time = t
@@ -117,6 +122,7 @@ def post_url(board_name, post_id):
             post.media_type = filename.rsplit('.', 1)[1].lower()
             post.media_name = file.filename
         post.board_name = board_name
+        post.poster = request.remote_addr
         db_sess = db_session.create_session()
         db_sess.add(post)
         db_sess.commit()
