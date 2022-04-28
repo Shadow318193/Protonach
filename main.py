@@ -46,6 +46,11 @@ def index():
     return render_template("index.html", boards=boards, boards_count=boards.count(), posts=posts)
 
 
+@app.route("/robots.txt")
+def robots():
+    return f"<pre>{open('robots.txt', 'r').read()}</pre>"
+
+
 @app.route("/<board_name>", methods=['POST', 'GET'])
 def board_url(board_name):
     if request.method == 'GET':
@@ -64,6 +69,20 @@ def board_url(board_name):
                                text="К сожалению, данная доска больше недоступна или её не существует.",
                                pics=["crab-rave.gif", "anon.png"])
     elif request.method == 'POST':
+        if "like" in request.form:
+            db_sess = db_session.create_session()
+            post = db_sess.query(Posts).filter(Posts.id == request.form["like"])
+            for p in post:
+                p.likes += 1
+            db_sess.commit()
+            return redirect(board_name)
+        elif "dislike" in request.form:
+            db_sess = db_session.create_session()
+            post = db_sess.query(Posts).filter(Posts.id == request.form["dislike"])
+            for p in post:
+                p.dislikes += 1
+            db_sess.commit()
+            return redirect(board_name)
         if not (request.form["topic"] or request.form["text"] or request.files["file"]):
             return redirect(board_name)
         post = Posts()
@@ -105,6 +124,20 @@ def post_url(board_name, post_id):
                                text="К сожалению, данный тред больше недоступен или его не существует.",
                                pics=["crab-rave.gif", "anon.png"])
     elif request.method == 'POST':
+        if "like" in request.form:
+            db_sess = db_session.create_session()
+            post = db_sess.query(Posts).filter(Posts.id == request.form["like"])
+            for p in post:
+                p.likes += 1
+            db_sess.commit()
+            return redirect(post_id)
+        elif "dislike" in request.form:
+            db_sess = db_session.create_session()
+            post = db_sess.query(Posts).filter(Posts.id == request.form["dislike"])
+            for p in post:
+                p.dislikes += 1
+            db_sess.commit()
+            return redirect(post_id)
         if not (request.form["topic"] or request.form["text"] or request.files["file"]):
             return redirect(post_id)
         post = Posts()

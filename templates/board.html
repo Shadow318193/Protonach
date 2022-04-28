@@ -58,8 +58,16 @@
             <div class="postmargin">
 
                 <div class="alert alert-info" role="alert">
+                        Аноним, {{ post.time }}, <b>№{{ post.id }}</b>
 
-                    <p>Аноним, {{ post.time }}, <b>№{{ post.id }}</b></p>
+                        <form method="post">
+                            <button type="submit" name="like" value="{{ post.id }}" class="badge bg-success rounded-pill">
+                                <div class="whitetext">{{ post.likes }}</div>
+                            </button>
+                            <button type="submit" name="dislike" value="{{ post.id }}" class="badge bg-danger rounded-pill">
+                                <div class="whitetext">{{ post.dislikes }}</div>
+                            </button>
+                        </form><br>
 
                     {% if post.topic %}
                         <h2>{{ post.topic }}</h2>
@@ -88,7 +96,7 @@
                     <div class="ms-2 me-auto">
                         <b><a href="/{{board.name}}/{{post.id}}">Войти в тред</a></b>
                         <span class="badge bg-info rounded-pill">
-                            {% if post_answers[post.id] % 10 == 0 or post_answers[post.id] % 10 >= 5 %}
+                            {% if post_answers[post.id] % 10 == 0 or post_answers[post.id] % 10 >= 5 or (11 <= post_answers[post.id] % 100 <= 19) %}
                             <div class="whitetext">{{ post_answers[post.id] }} ответов</div>
                             {% elif post_answers[post.id] % 10 == 1 %}
                             <div class="whitetext">{{ post_answers[post.id] }} ответ</div>

@@ -35,7 +35,16 @@
 
             <div class="alert alert-info" role="alert">
 
-                <p>Аноним, {{ the_post.time }}, <b>№{{ the_post.id }}</b></p>
+                Аноним, {{ the_post.time }}, <b>№{{ the_post.id }}</b>
+
+                <form method="post">
+                    <button type="submit" name="like" value="{{ the_post.id }}" class="badge bg-success rounded-pill">
+                        <div class="whitetext">{{ the_post.likes }}</div>
+                    </button>
+                    <button type="submit" name="dislike" value="{{ the_post.id }}" class="badge bg-danger rounded-pill">
+                        <div class="whitetext">{{ the_post.dislikes }}</div>
+                    </button>
+                </form><br>
 
                 {% if the_post.topic %}
                     <h2>{{ the_post.topic }}</h2>
@@ -77,7 +86,16 @@
 
                         <div class="alert alert-info" role="alert">
 
-                            <p>Аноним, {{ post.time }}, <b>№{{ post.id }}</b></p>
+                            Аноним, {{ post.time }}, <b>№{{ post.id }}</b>
+
+                            <form method="post">
+                            <button type="submit" name="like" value="{{ post.id }}" class="badge bg-success rounded-pill">
+                                <div class="whitetext">{{ post.likes }}</div>
+                            </button>
+                            <button type="submit" name="dislike" value="{{ post.id }}" class="badge bg-danger rounded-pill">
+                                <div class="whitetext">{{ post.dislikes }}</div>
+                            </button>
+                            </form><br>
 
                             {% if post.topic %}
                                 <h2>{{ post.topic }}</h2>
