@@ -1,7 +1,6 @@
 from flask import Flask, request, render_template, redirect
 
 import os
-import datetime
 
 from data import db_session
 from data.boards import Boards
@@ -69,37 +68,50 @@ def board_url(board_name):
                                text="К сожалению, данная доска больше недоступна или её не существует.",
                                pics=["crab-rave.gif", "anon.png"])
     elif request.method == 'POST':
+        ip = request.remote_addr
         if "like" in request.form:
             db_sess = db_session.create_session()
             post = db_sess.query(Posts).filter(Posts.id == request.form["like"])
             for p in post:
-                p.likes += 1
+                if ip not in p.raters:
+                    p.likes += 1
+                    if p.raters:
+                        raters = p.raters.split(";")
+                        raters.append(ip)
+                        p.raters = ";".join(raters)
+                    else:
+                        p.raters = ip
             db_sess.commit()
             return redirect(board_name)
         elif "dislike" in request.form:
             db_sess = db_session.create_session()
             post = db_sess.query(Posts).filter(Posts.id == request.form["dislike"])
             for p in post:
-                p.dislikes += 1
+                if ip not in p.raters:
+                    p.dislikes += 1
+                    if p.raters:
+                        raters = p.raters.split(";")
+                        raters.append(ip)
+                        p.raters = ";".join(raters)
+                    else:
+                        p.raters = ip
             db_sess.commit()
             return redirect(board_name)
         if not (request.form["topic"] or request.form["text"] or request.files["file"]):
             return redirect(board_name)
         post = Posts()
-        t = datetime.datetime.now()
-        post.time = t
         post.topic = request.form["topic"]
         post.text = request.form["text"]
         file = request.files["file"]
         if file and allowed_file(file.filename):
-            filename = str(t).replace(" ", "-").replace(".", "-").replace(":", "-").lower() + \
+            filename = str(post.time).replace(" ", "-").replace(".", "-").replace(":", "-").lower() + \
                        "." + file.filename.rsplit('.', 1)[1].lower()
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             post.media = filename
             post.media_type = filename.rsplit('.', 1)[1].lower()
             post.media_name = file.filename
         post.board_name = board_name
-        post.poster = request.remote_addr
+        post.poster = ip
         db_sess = db_session.create_session()
         db_sess.add(post)
         db_sess.commit()
@@ -124,38 +136,51 @@ def post_url(board_name, post_id):
                                text="К сожалению, данный тред больше недоступен или его не существует.",
                                pics=["crab-rave.gif", "anon.png"])
     elif request.method == 'POST':
+        ip = request.remote_addr
         if "like" in request.form:
             db_sess = db_session.create_session()
             post = db_sess.query(Posts).filter(Posts.id == request.form["like"])
             for p in post:
-                p.likes += 1
+                if ip not in p.raters:
+                    p.likes += 1
+                    if p.raters:
+                        raters = p.raters.split(";")
+                        raters.append(ip)
+                        p.raters = ";".join(raters)
+                    else:
+                        p.raters = ip
             db_sess.commit()
             return redirect(post_id)
         elif "dislike" in request.form:
             db_sess = db_session.create_session()
             post = db_sess.query(Posts).filter(Posts.id == request.form["dislike"])
             for p in post:
-                p.dislikes += 1
+                if ip not in p.raters:
+                    p.dislikes += 1
+                    if p.raters:
+                        raters = p.raters.split(";")
+                        raters.append(ip)
+                        p.raters = ";".join(raters)
+                    else:
+                        p.raters = ip
             db_sess.commit()
             return redirect(post_id)
         if not (request.form["topic"] or request.form["text"] or request.files["file"]):
             return redirect(post_id)
         post = Posts()
-        t = datetime.datetime.now()
-        post.time = t
         post.parent_post = post_id
         post.topic = request.form["topic"]
         post.text = request.form["text"]
         file = request.files["file"]
         if file and allowed_file(file.filename):
-            filename = str(t).replace(" ", "-").replace(".", "-").replace(":", "-").lower() + \
+            filename = str(post.time).replace(" ", "-").replace(".", "-").replace(":", "-").lower() + \
                        "." + file.filename.rsplit('.', 1)[1].lower()
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             post.media = filename
             post.media_type = filename.rsplit('.', 1)[1].lower()
             post.media_name = file.filename
         post.board_name = board_name
-        post.poster = request.remote_addr
+        post.poster = ip
         db_sess = db_session.create_session()
         db_sess.add(post)
         db_sess.commit()

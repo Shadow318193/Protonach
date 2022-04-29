@@ -1,3 +1,5 @@
+import datetime
+
 import sqlalchemy
 from sqlalchemy import orm
 
@@ -16,8 +18,9 @@ class Posts(SqlAlchemyBase):
     poster = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     likes = sqlalchemy.Column(sqlalchemy.Integer, default=0)
     dislikes = sqlalchemy.Column(sqlalchemy.Integer, default=0)
+    raters = sqlalchemy.Column(sqlalchemy.String, nullable=True, default="")
     board_name = sqlalchemy.Column(sqlalchemy.String, sqlalchemy.ForeignKey("boards.name"), nullable=False)
     parent_post = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
-    time = sqlalchemy.Column(sqlalchemy.DateTime, nullable=False)
+    time = sqlalchemy.Column(sqlalchemy.DateTime, nullable=False, default=datetime.datetime.now)
 
     board = orm.relation("Boards")
