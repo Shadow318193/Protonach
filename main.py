@@ -68,7 +68,9 @@ def board_url(board_name):
                                text="К сожалению, данная доска больше недоступна или её не существует.",
                                pics=["crab-rave.gif", "anon.png"])
     elif request.method == 'POST':
-        ip = request.remote_addr
+        ip = request.remote_user
+        # ip = request.headers['X-Real-IP']
+        # FOR PYTHONANYWHERE.COM
         if "like" in request.form:
             db_sess = db_session.create_session()
             post = db_sess.query(Posts).filter(Posts.id == request.form["like"])
@@ -136,7 +138,9 @@ def post_url(board_name, post_id):
                                text="К сожалению, данный тред больше недоступен или его не существует.",
                                pics=["crab-rave.gif", "anon.png"])
     elif request.method == 'POST':
-        ip = request.remote_addr
+        ip = request.remote_user
+        # ip = request.headers['X-Real-IP']
+        # FOR PYTHONANYWHERE.COM
         if "like" in request.form:
             db_sess = db_session.create_session()
             post = db_sess.query(Posts).filter(Posts.id == request.form["like"])
