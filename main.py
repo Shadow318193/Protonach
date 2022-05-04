@@ -74,7 +74,7 @@ def board_url(board_name):
                 post_answers[post.id] = db_sess.query(Posts).filter(Posts.parent_post == post.id).count()
             return render_template("board.html", board=board_obj, posts=posts, posts_count=posts.count(),
                                    post_answers=post_answers, image_files=IMAGE_FILES, video_files=VIDEO_FILES,
-                                   sound_files=AUDIO_FILES, accept_files=accept,
+                                   audio_files=AUDIO_FILES, accept_files=accept,
                                    captcha=f"/static/media/captchas/{captcha_for_ip[ip]}.png")
         return render_template("error.html", code=404,
                                text="К сожалению, данная доска больше недоступна или её не существует.",
@@ -151,7 +151,7 @@ def post_url(board_name, post_id):
                 posts = db_sess.query(Posts).filter(Posts.parent_post == post_id)
                 return render_template("post.html", board=board_obj, the_post=post_obj, posts=posts,
                                        posts_count=posts.count(), image_files=IMAGE_FILES, video_files=VIDEO_FILES,
-                                       sound_files=AUDIO_FILES, accept_files=accept,
+                                       audio_files=AUDIO_FILES, accept_files=accept,
                                        captcha=f"/static/media/captchas/{captcha_for_ip[ip]}.png")
         return render_template("error.html", code=404,
                                text="К сожалению, данный тред больше недоступен или его не существует.",
