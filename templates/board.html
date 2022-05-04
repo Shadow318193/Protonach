@@ -41,6 +41,11 @@
                     <label for="file">Приложите медиафайл</label>
                     <input type=file class="form-control-file" id="file" name="file" accept="{{ accept_files }}">
                 </div>
+                <div class="form-group">
+                    <label for="file">Введите цифры, как на картинке:</label>
+                    <img src="{{ captcha }}">
+                    <textarea class="form-control" id="captcha" rows="1" name="captcha"></textarea>
+                </div>
 
                 <button type="submit" class="btn btn-primary">Отправить</button>
             </form>
@@ -84,7 +89,7 @@
                             </a><br>
                         {% elif post.media_type in video_files %}
                             <video controls src="/static/media/from_users/{{ post.media }}" height="192"></video>
-                        {% elif post.media_type in sound_files %}
+                        {% elif post.media_type in audio_files %}
                             <audio controls src="/static/media/from_users/{{ post.media }}"></audio>
                         {% endif %}
                         <br>

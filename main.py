@@ -1,4 +1,6 @@
 from flask import Flask, request, render_template, redirect
+from captcha.image import ImageCaptcha
+from random import choice
 
 import os
 
@@ -11,28 +13,29 @@ app.config['SECRET_KEY'] = 'secret_key'
 app.config['UPLOAD_FOLDER'] = 'static/media/from_users'
 app.config['MAX_CONTENT_LENGTH'] = 128 * 1024 * 1024
 
-image_files = ["png", "jpg", "jpeg", "gif", "jfif", "pjpeg", "pjp", "jpe", "webp"]
-video_files = ["webm", "mp4", "m4v"]
-audio_files = ["mp3", "wav"]
+IMAGE_FILES = ["png", "jpg", "jpeg", "gif", "jfif", "pjpeg", "pjp", "jpe", "webp"]
+VIDEO_FILES = ["webm", "mp4", "m4v"]
+AUDIO_FILES = ["mp3", "wav"]
 
-allowed_files = image_files + video_files + audio_files
+ALLOWED_FILES = IMAGE_FILES + VIDEO_FILES + AUDIO_FILES
 
 
 def make_accept_for_html(mime):
-    if mime in image_files:
+    if mime in IMAGE_FILES:
         return "image/" + mime
-    elif mime in video_files:
+    elif mime in VIDEO_FILES:
         return "video/" + mime
-    elif mime in audio_files:
+    elif mime in AUDIO_FILES:
         return "audio/" + mime
 
 
-accept = ",".join([make_accept_for_html(x) for x in allowed_files])
+accept = ",".join([make_accept_for_html(x) for x in ALLOWED_FILES])
+captcha_for_ip = {}
 
 
 def allowed_file(filename):
     return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in allowed_files
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_FILES
 
 
 @app.route("/")
@@ -52,7 +55,15 @@ def robots():
 
 @app.route("/<board_name>", methods=['POST', 'GET'])
 def board_url(board_name):
+    ip = request.remote_addr
+    # ip = request.headers['X-Real-IP']
+    # FOR PYTHONANYWHERE.COM
     if request.method == 'GET':
+        captcha_for_ip[ip] = "".join([choice(
+            ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]) for _ in range(6)])
+        image = ImageCaptcha(width=280, height=90)
+        image.generate(captcha_for_ip[ip])
+        image.write(captcha_for_ip[ip], f"static/media/captchas/{captcha_for_ip[ip]}.png")
         db_sess = db_session.create_session()
         board_select = db_sess.query(Boards).filter(Boards.name == board_name)
         for board_obj in board_select:
@@ -62,15 +73,13 @@ def board_url(board_name):
             for post in posts:
                 post_answers[post.id] = db_sess.query(Posts).filter(Posts.parent_post == post.id).count()
             return render_template("board.html", board=board_obj, posts=posts, posts_count=posts.count(),
-                                   post_answers=post_answers, image_files=image_files, video_files=video_files,
-                                   sound_files=audio_files, accept_files=accept)
+                                   post_answers=post_answers, image_files=IMAGE_FILES, video_files=VIDEO_FILES,
+                                   sound_files=AUDIO_FILES, accept_files=accept,
+                                   captcha=f"/static/media/captchas/{captcha_for_ip[ip]}.png")
         return render_template("error.html", code=404,
                                text="К сожалению, данная доска больше недоступна или её не существует.",
                                pics=["crab-rave.gif", "anon.png"])
     elif request.method == 'POST':
-        ip = request.remote_user
-        # ip = request.headers['X-Real-IP']
-        # FOR PYTHONANYWHERE.COM
         if "like" in request.form:
             db_sess = db_session.create_session()
             post = db_sess.query(Posts).filter(Posts.id == request.form["like"])
@@ -99,9 +108,11 @@ def board_url(board_name):
                         p.raters = ip
             db_sess.commit()
             return redirect(board_name)
-        if not (request.form["topic"] or request.form["text"] or request.files["file"]):
+        if not (request.form["topic"] or request.form["text"] or request.files["file"]) \
+                or request.form["captcha"] != captcha_for_ip[ip]:
             return redirect(board_name)
         post = Posts()
+        post.poster = ip
         post.topic = request.form["topic"]
         post.text = request.form["text"]
         file = request.files["file"]
@@ -113,7 +124,6 @@ def board_url(board_name):
             post.media_type = filename.rsplit('.', 1)[1].lower()
             post.media_name = file.filename
         post.board_name = board_name
-        post.poster = ip
         db_sess = db_session.create_session()
         db_sess.add(post)
         db_sess.commit()
@@ -122,7 +132,15 @@ def board_url(board_name):
 
 @app.route("/<board_name>/<post_id>", methods=['POST', 'GET'])
 def post_url(board_name, post_id):
+    ip = request.remote_addr
+    # ip = request.headers['X-Real-IP']
+    # FOR PYTHONANYWHERE.COM
     if request.method == 'GET':
+        captcha_for_ip[ip] = "".join([choice(
+            ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]) for _ in range(6)])
+        image = ImageCaptcha(width=280, height=90)
+        image.generate(captcha_for_ip[ip])
+        image.write(captcha_for_ip[ip], f"static/media/captchas/{captcha_for_ip[ip]}.png")
         db_sess = db_session.create_session()
         board_select = db_sess.query(Boards).filter(Boards.name == board_name)
         post_select = db_sess.query(Posts).filter(Posts.id == post_id,
@@ -132,15 +150,13 @@ def post_url(board_name, post_id):
             for post_obj in post_select:
                 posts = db_sess.query(Posts).filter(Posts.parent_post == post_id)
                 return render_template("post.html", board=board_obj, the_post=post_obj, posts=posts,
-                                       posts_count=posts.count(), image_files=image_files, video_files=video_files,
-                                       sound_files=audio_files, accept_files=accept)
+                                       posts_count=posts.count(), image_files=IMAGE_FILES, video_files=VIDEO_FILES,
+                                       sound_files=AUDIO_FILES, accept_files=accept,
+                                       captcha=f"/static/media/captchas/{captcha_for_ip[ip]}.png")
         return render_template("error.html", code=404,
                                text="К сожалению, данный тред больше недоступен или его не существует.",
                                pics=["crab-rave.gif", "anon.png"])
     elif request.method == 'POST':
-        ip = request.remote_user
-        # ip = request.headers['X-Real-IP']
-        # FOR PYTHONANYWHERE.COM
         if "like" in request.form:
             db_sess = db_session.create_session()
             post = db_sess.query(Posts).filter(Posts.id == request.form["like"])
@@ -169,9 +185,11 @@ def post_url(board_name, post_id):
                         p.raters = ip
             db_sess.commit()
             return redirect(post_id)
-        if not (request.form["topic"] or request.form["text"] or request.files["file"]):
+        if not (request.form["topic"] or request.form["text"] or request.files["file"]) \
+                or request.form["captcha"] != captcha_for_ip[ip]:
             return redirect(post_id)
         post = Posts()
+        post.poster = ip
         post.parent_post = post_id
         post.topic = request.form["topic"]
         post.text = request.form["text"]
@@ -184,7 +202,6 @@ def post_url(board_name, post_id):
             post.media_type = filename.rsplit('.', 1)[1].lower()
             post.media_name = file.filename
         post.board_name = board_name
-        post.poster = ip
         db_sess = db_session.create_session()
         db_sess.add(post)
         db_sess.commit()
