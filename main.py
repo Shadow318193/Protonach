@@ -3,6 +3,7 @@ from captcha.image import ImageCaptcha
 from random import choice
 
 import os
+import pathlib
 
 from data import db_session
 from data.boards import Boards
@@ -42,7 +43,8 @@ def allowed_file(filename):
 def index():
     ip = request.remote_addr
     if ip in captcha_for_ip:
-        os.remove(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png")
+        if pathlib.Path(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png").is_file():
+            os.remove(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png")
     db_sess = db_session.create_session()
     boards = db_sess.query(Boards)
     posts = {}
@@ -55,7 +57,8 @@ def index():
 def robots():
     ip = request.remote_addr
     if ip in captcha_for_ip:
-        os.remove(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png")
+        if pathlib.Path(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png").is_file():
+            os.remove(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png")
     return f"<pre>{open('robots.txt', 'r').read()}</pre>"
 
 
@@ -66,7 +69,8 @@ def board_url(board_name):
     # FOR PYTHONANYWHERE.COM
     if request.method == 'GET':
         if ip in captcha_for_ip:
-            os.remove(f"static/media/captchas/{captcha_for_ip[ip]}.png")
+            if pathlib.Path(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png").is_file():
+                os.remove(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png")
         captcha_for_ip[ip] = "".join([choice(
             ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]) for _ in range(6)])
         image = ImageCaptcha(width=280, height=90)
@@ -145,7 +149,8 @@ def board_url(board_name):
         print(f"Медиа: {post.media_name}")
         print(f"Время: {post.time}")
         if ip in captcha_for_ip:
-            os.remove(f"static/media/captchas/{captcha_for_ip[ip]}.png")
+            if pathlib.Path(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png").is_file():
+                os.remove(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png")
         captcha_for_ip[ip] = "".join([choice(
             ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]) for _ in range(6)])
         image = ImageCaptcha(width=280, height=90)
@@ -243,7 +248,8 @@ def post_url(board_name, post_id):
         print(f"Время: {post.time}")
         print(f"Является ответом на пост с ID {post.parent_post}")
         if ip in captcha_for_ip:
-            os.remove(f"static/media/captchas/{captcha_for_ip[ip]}.png")
+            if pathlib.Path(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png").is_file():
+                os.remove(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png")
         captcha_for_ip[ip] = "".join([choice(
             ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]) for _ in range(6)])
         image = ImageCaptcha(width=280, height=90)
