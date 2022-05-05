@@ -40,6 +40,9 @@ def allowed_file(filename):
 
 @app.route("/")
 def index():
+    ip = request.remote_addr
+    if ip in captcha_for_ip:
+        os.remove(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png")
     db_sess = db_session.create_session()
     boards = db_sess.query(Boards)
     posts = {}
@@ -50,6 +53,9 @@ def index():
 
 @app.route("/robots.txt")
 def robots():
+    ip = request.remote_addr
+    if ip in captcha_for_ip:
+        os.remove(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png")
     return f"<pre>{open('robots.txt', 'r').read()}</pre>"
 
 
@@ -81,7 +87,7 @@ def board_url(board_name):
                                    captcha=f"/static/media/captchas/{captcha_for_ip[ip]}.png")
         return render_template("error.html", code=404,
                                text="К сожалению, данная доска больше недоступна или её не существует.",
-                               pics=["crab-rave.gif", "anon.png"])
+                               pics=["crab-rave.gif", "mario.gif"])
     elif request.method == 'POST':
         if "like" in request.form:
             db_sess = db_session.create_session()
@@ -177,7 +183,7 @@ def post_url(board_name, post_id):
                                        captcha=f"/static/media/captchas/{captcha_for_ip[ip]}.png")
         return render_template("error.html", code=404,
                                text="К сожалению, данный тред больше недоступен или его не существует.",
-                               pics=["crab-rave.gif", "anon.png"])
+                               pics=["crab-rave.gif", "mario.gif"])
     elif request.method == 'POST':
         if "like" in request.form:
             db_sess = db_session.create_session()
@@ -252,7 +258,7 @@ def error404(e):
     print(e)
     return render_template("error.html", code=404,
                            text="К сожалению, данный материал больше недоступен или его не существует.",
-                           pics=["crab-rave.gif", "anon.png"])
+                           pics=["crab-rave.gif", "mario.gif"])
 
 
 @app.errorhandler(413)
@@ -261,7 +267,7 @@ def error413(e):
     return render_template("error.html", code=413,
                            text="Извините, но прикреплённый файл оказался по размерам слишком крут "
                                 "и опасен для сервера, поэтому сервер подписал отказ в отправке.",
-                           pics=["too_cool_and_dangerous.gif"])
+                           pics=["too_cool_and_dangerous.gif", "over9000.png"])
 
 
 @app.errorhandler(500)
