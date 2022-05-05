@@ -59,6 +59,8 @@ def board_url(board_name):
     # ip = request.headers['X-Real-IP']
     # FOR PYTHONANYWHERE.COM
     if request.method == 'GET':
+        if ip in captcha_for_ip:
+            os.remove(f"static/media/captchas/{captcha_for_ip[ip]}.png")
         captcha_for_ip[ip] = "".join([choice(
             ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]) for _ in range(6)])
         image = ImageCaptcha(width=280, height=90)
@@ -127,6 +129,13 @@ def board_url(board_name):
         db_sess = db_session.create_session()
         db_sess.add(post)
         db_sess.commit()
+        if ip in captcha_for_ip:
+            os.remove(f"static/media/captchas/{captcha_for_ip[ip]}.png")
+        captcha_for_ip[ip] = "".join([choice(
+            ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]) for _ in range(6)])
+        image = ImageCaptcha(width=280, height=90)
+        image.generate(captcha_for_ip[ip])
+        image.write(captcha_for_ip[ip], f"static/media/captchas/{captcha_for_ip[ip]}.png")
         return redirect(board_name + "/" + str(post.id))
 
 
@@ -136,6 +145,8 @@ def post_url(board_name, post_id):
     # ip = request.headers['X-Real-IP']
     # FOR PYTHONANYWHERE.COM
     if request.method == 'GET':
+        if ip in captcha_for_ip:
+            os.remove(f"static/media/captchas/{captcha_for_ip[ip]}.png")
         captcha_for_ip[ip] = "".join([choice(
             ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]) for _ in range(6)])
         image = ImageCaptcha(width=280, height=90)
@@ -205,6 +216,13 @@ def post_url(board_name, post_id):
         db_sess = db_session.create_session()
         db_sess.add(post)
         db_sess.commit()
+        if ip in captcha_for_ip:
+            os.remove(f"static/media/captchas/{captcha_for_ip[ip]}.png")
+        captcha_for_ip[ip] = "".join([choice(
+            ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]) for _ in range(6)])
+        image = ImageCaptcha(width=280, height=90)
+        image.generate(captcha_for_ip[ip])
+        image.write(captcha_for_ip[ip], f"static/media/captchas/{captcha_for_ip[ip]}.png")
         return redirect(post_id)
 
 
