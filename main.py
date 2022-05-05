@@ -66,6 +66,7 @@ def board_url(board_name):
         image = ImageCaptcha(width=280, height=90)
         image.generate(captcha_for_ip[ip])
         image.write(captcha_for_ip[ip], f"static/media/captchas/{captcha_for_ip[ip]}.png")
+        print("Сгенерирована новая каптча")
         db_sess = db_session.create_session()
         board_select = db_sess.query(Boards).filter(Boards.name == board_name)
         for board_obj in board_select:
@@ -94,6 +95,7 @@ def board_url(board_name):
                         p.raters = ";".join(raters)
                     else:
                         p.raters = ip
+                    print(f"С устройства с IP {ip} был оставлен лайк на посте с ID {p.id}:")
             db_sess.commit()
             return redirect(board_name)
         elif "dislike" in request.form:
@@ -108,6 +110,7 @@ def board_url(board_name):
                         p.raters = ";".join(raters)
                     else:
                         p.raters = ip
+                    print(f"С устройства с IP {ip} был оставлен дизлайк на посте с ID {p.id}:")
             db_sess.commit()
             return redirect(board_name)
         if not (request.form["topic"] or request.form["text"] or request.files["file"]) \
@@ -129,6 +132,12 @@ def board_url(board_name):
         db_sess = db_session.create_session()
         db_sess.add(post)
         db_sess.commit()
+        print(f"С устройства с IP {ip} было отправлено сообщение следующего содержания:")
+        print(f"ID поста: {post.id}")
+        print(f"Заголовок: {post.topic}")
+        print(f"Основной текст: {post.text}")
+        print(f"Медиа: {post.media_name}")
+        print(f"Время: {post.time}")
         if ip in captcha_for_ip:
             os.remove(f"static/media/captchas/{captcha_for_ip[ip]}.png")
         captcha_for_ip[ip] = "".join([choice(
@@ -136,6 +145,7 @@ def board_url(board_name):
         image = ImageCaptcha(width=280, height=90)
         image.generate(captcha_for_ip[ip])
         image.write(captcha_for_ip[ip], f"static/media/captchas/{captcha_for_ip[ip]}.png")
+        print("Сгенерирована новая каптча")
         return redirect(board_name + "/" + str(post.id))
 
 
@@ -152,6 +162,7 @@ def post_url(board_name, post_id):
         image = ImageCaptcha(width=280, height=90)
         image.generate(captcha_for_ip[ip])
         image.write(captcha_for_ip[ip], f"static/media/captchas/{captcha_for_ip[ip]}.png")
+        print("Сгенерирована новая каптча")
         db_sess = db_session.create_session()
         board_select = db_sess.query(Boards).filter(Boards.name == board_name)
         post_select = db_sess.query(Posts).filter(Posts.id == post_id,
@@ -180,6 +191,7 @@ def post_url(board_name, post_id):
                         p.raters = ";".join(raters)
                     else:
                         p.raters = ip
+                    print(f"С устройства с IP {ip} был оставлен лайк на посте с ID {p.id}:")
             db_sess.commit()
             return redirect(post_id)
         elif "dislike" in request.form:
@@ -194,6 +206,7 @@ def post_url(board_name, post_id):
                         p.raters = ";".join(raters)
                     else:
                         p.raters = ip
+                    print(f"С устройства с IP {ip} был оставлен дизлайк на посте с ID {p.id}:")
             db_sess.commit()
             return redirect(post_id)
         if not (request.form["topic"] or request.form["text"] or request.files["file"]) \
@@ -216,6 +229,13 @@ def post_url(board_name, post_id):
         db_sess = db_session.create_session()
         db_sess.add(post)
         db_sess.commit()
+        print(f"С устройства с IP {ip} было отправлено сообщение следующего содержания:")
+        print(f"ID поста: {post.id}")
+        print(f"Заголовок: {post.topic}")
+        print(f"Основной текст: {post.text}")
+        print(f"Медиа: {post.media_name}")
+        print(f"Время: {post.time}")
+        print(f"Является ответом на пост с ID {post.parent_post}")
         if ip in captcha_for_ip:
             os.remove(f"static/media/captchas/{captcha_for_ip[ip]}.png")
         captcha_for_ip[ip] = "".join([choice(
@@ -223,6 +243,7 @@ def post_url(board_name, post_id):
         image = ImageCaptcha(width=280, height=90)
         image.generate(captcha_for_ip[ip])
         image.write(captcha_for_ip[ip], f"static/media/captchas/{captcha_for_ip[ip]}.png")
+        print("Сгенерирована новая каптча")
         return redirect(post_id)
 
 
@@ -252,6 +273,15 @@ def error500(e):
                            pics=["prichincheskaya_tehnina.png"])
 
 
+@app.errorhandler(502)
+def error502(e):
+    print(e)
+    return render_template("error.html", code=502,
+                           text="По причинческим технинам у сервера разногласия с хостом. "
+                                "Извините за доставленные неудобства.",
+                           pics=["prichincheskaya_tehnina.png"])
+
+
 def main():
     db_session.global_init("db/imageboard.db")
     app.run(host="0.0.0.0")
@@ -259,3 +289,6 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+# db_session.global_init("db/imageboard.db")
+# FOR PYTHONANYWHERE.COM
