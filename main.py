@@ -49,6 +49,21 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_FILES
 
 
+def generate_new_captcha(ip):
+    if ip in captcha_for_ip:
+        if os.path.isfile(f"static/media/captchas/{captcha_for_ip[ip]}.png"):
+            os.remove(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png")
+    captcha_for_ip[ip] = "".join([choice(
+        ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]) for _ in range(6)])
+    image = ImageCaptcha(width=280, height=90)
+    image.generate(captcha_for_ip[ip])
+    image.write(captcha_for_ip[ip], f"static/media/captchas/{captcha_for_ip[ip]}.png")
+    print("Сгенерирована новая каптча")
+    while not os.path.isfile(f"static/media/captchas/{captcha_for_ip[ip]}.png"):
+        print("Заставляем сервер найти каптчу...")
+    print("OK")
+
+
 @app.route("/")
 def index():
     ip = request.remote_addr
@@ -78,15 +93,7 @@ def board_url(board_name):
     # ip = request.headers['X-Real-IP']
     # FOR PYTHONANYWHERE.COM
     if request.method == 'GET':
-        if ip in captcha_for_ip:
-            if os.path.isfile(f"static/media/captchas/{captcha_for_ip[ip]}.png"):
-                os.remove(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png")
-        captcha_for_ip[ip] = "".join([choice(
-            ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]) for _ in range(6)])
-        image = ImageCaptcha(width=280, height=90)
-        image.generate(captcha_for_ip[ip])
-        image.write(captcha_for_ip[ip], f"static/media/captchas/{captcha_for_ip[ip]}.png")
-        print("Сгенерирована новая каптча")
+        generate_new_captcha(ip)
         db_sess = db_session.create_session()
         board_select = db_sess.query(Boards).filter(Boards.name == board_name)
         for board_obj in board_select:
@@ -159,15 +166,7 @@ def board_url(board_name):
         print(f"Основной текст: {post.text}")
         print(f"Медиа: {post.media_name}")
         print(f"Время: {post.time}")
-        if ip in captcha_for_ip:
-            if os.path.isfile(f"static/media/captchas/{captcha_for_ip[ip]}.png"):
-                os.remove(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png")
-        captcha_for_ip[ip] = "".join([choice(
-            ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]) for _ in range(6)])
-        image = ImageCaptcha(width=280, height=90)
-        image.generate(captcha_for_ip[ip])
-        image.write(captcha_for_ip[ip], f"static/media/captchas/{captcha_for_ip[ip]}.png")
-        print("Сгенерирована новая каптча")
+        generate_new_captcha(ip)
         return redirect(board_name + "/" + str(post.id))
 
 
@@ -177,15 +176,7 @@ def post_url(board_name, post_id):
     # ip = request.headers['X-Real-IP']
     # FOR PYTHONANYWHERE.COM
     if request.method == 'GET':
-        if ip in captcha_for_ip:
-            if os.path.isfile(f"static/media/captchas/{captcha_for_ip[ip]}.png"):
-                os.remove(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png")
-        captcha_for_ip[ip] = "".join([choice(
-            ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]) for _ in range(6)])
-        image = ImageCaptcha(width=280, height=90)
-        image.generate(captcha_for_ip[ip])
-        image.write(captcha_for_ip[ip], f"static/media/captchas/{captcha_for_ip[ip]}.png")
-        print("Сгенерирована новая каптча")
+        generate_new_captcha(ip)
         db_sess = db_session.create_session()
         board_select = db_sess.query(Boards).filter(Boards.name == board_name)
         post_select = db_sess.query(Posts).filter(Posts.id == post_id,
@@ -260,15 +251,7 @@ def post_url(board_name, post_id):
         print(f"Медиа: {post.media_name}")
         print(f"Время: {post.time}")
         print(f"Является ответом на пост с ID {post.parent_post}")
-        if ip in captcha_for_ip:
-            if os.path.isfile(f"static/media/captchas/{captcha_for_ip[ip]}.png"):
-                os.remove(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png")
-        captcha_for_ip[ip] = "".join([choice(
-            ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]) for _ in range(6)])
-        image = ImageCaptcha(width=280, height=90)
-        image.generate(captcha_for_ip[ip])
-        image.write(captcha_for_ip[ip], f"static/media/captchas/{captcha_for_ip[ip]}.png")
-        print("Сгенерирована новая каптча")
+        generate_new_captcha(ip)
         return redirect(post_id)
 
 
