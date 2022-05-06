@@ -60,9 +60,6 @@ def generate_new_captcha(ip):
     image.generate(captcha_for_ip[ip])
     image.write(captcha_for_ip[ip], f"static/media/captchas/{captcha_for_ip[ip]}.png")
     print("Сгенерирована новая каптча")
-    while not os.path.isfile(f"static/media/captchas/{captcha_for_ip[ip]}.png"):
-        print("Заставляем сервер найти каптчу...")
-    print("OK")
 
 
 @app.route("/")
