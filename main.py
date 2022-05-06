@@ -1,9 +1,10 @@
 from flask import Flask, request, render_template, redirect
 from captcha.image import ImageCaptcha
 from random import choice
+from threading import Timer
 
 import os
-from threading import Timer
+import datetime
 
 from data import db_session
 from data.boards import Boards
@@ -136,11 +137,13 @@ def board_url(board_name):
                 or request.form["captcha"] != captcha_for_ip[ip]:
             return redirect(board_name)
         post = Posts()
+        post.time = datetime.datetime.now()
         post.poster = ip
         post.topic = request.form["topic"]
         post.text = request.form["text"]
         file = request.files["file"]
         if file and allowed_file(file.filename):
+            print(str(post.time))
             filename = str(post.time).replace(" ", "-").replace(".", "-").replace(":", "-").lower() + \
                        "." + file.filename.rsplit('.', 1)[1].lower()
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
@@ -234,12 +237,14 @@ def post_url(board_name, post_id):
                 or request.form["captcha"] != captcha_for_ip[ip]:
             return redirect(post_id)
         post = Posts()
+        post.time = datetime.datetime.now()
         post.poster = ip
         post.parent_post = post_id
         post.topic = request.form["topic"]
         post.text = request.form["text"]
         file = request.files["file"]
         if file and allowed_file(file.filename):
+            print(str(post.time))
             filename = str(post.time).replace(" ", "-").replace(".", "-").replace(":", "-").lower() + \
                        "." + file.filename.rsplit('.', 1)[1].lower()
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
