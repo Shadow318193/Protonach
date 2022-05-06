@@ -143,7 +143,6 @@ def board_url(board_name):
         post.text = request.form["text"]
         file = request.files["file"]
         if file and allowed_file(file.filename):
-            print(str(post.time))
             filename = str(post.time).replace(" ", "-").replace(".", "-").replace(":", "-").lower() + \
                        "." + file.filename.rsplit('.', 1)[1].lower()
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
@@ -244,7 +243,6 @@ def post_url(board_name, post_id):
         post.text = request.form["text"]
         file = request.files["file"]
         if file and allowed_file(file.filename):
-            print(str(post.time))
             filename = str(post.time).replace(" ", "-").replace(".", "-").replace(":", "-").lower() + \
                        "." + file.filename.rsplit('.', 1)[1].lower()
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
