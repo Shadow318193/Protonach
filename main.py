@@ -3,7 +3,7 @@ from captcha.image import ImageCaptcha
 from random import choice
 
 import os
-import pathlib
+from threading import Timer
 
 from data import db_session
 from data.boards import Boards
@@ -19,6 +19,15 @@ VIDEO_FILES = ["webm", "mp4", "m4v"]
 AUDIO_FILES = ["mp3", "wav"]
 
 ALLOWED_FILES = IMAGE_FILES + VIDEO_FILES + AUDIO_FILES
+
+
+class RepeatTimer(Timer):
+    def __init__(self, interval, function, args=None, kwargs=None):
+        Timer.__init__(self, interval=interval, function=function, args=args, kwargs=kwargs)
+
+    def run(self):
+        while not self.finished.wait(self.interval):
+            self.function(*self.args, **self.kwargs)
 
 
 def make_accept_for_html(mime):
@@ -43,7 +52,7 @@ def allowed_file(filename):
 def index():
     ip = request.remote_addr
     if ip in captcha_for_ip:
-        if pathlib.Path(f"static/media/captchas/{captcha_for_ip[ip]}.png").is_file():
+        if os.path.isfile(f"static/media/captchas/{captcha_for_ip[ip]}.png"):
             os.remove(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png")
     db_sess = db_session.create_session()
     boards = db_sess.query(Boards)
@@ -57,7 +66,7 @@ def index():
 def robots():
     ip = request.remote_addr
     if ip in captcha_for_ip:
-        if pathlib.Path(f"static/media/captchas/{captcha_for_ip[ip]}.png").is_file():
+        if os.path.isfile(f"static/media/captchas/{captcha_for_ip[ip]}.png"):
             os.remove(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png")
     return f"<pre>{open('robots.txt', 'r').read()}</pre>"
 
@@ -69,7 +78,7 @@ def board_url(board_name):
     # FOR PYTHONANYWHERE.COM
     if request.method == 'GET':
         if ip in captcha_for_ip:
-            if pathlib.Path(f"static/media/captchas/{captcha_for_ip[ip]}.png").is_file():
+            if os.path.isfile(f"static/media/captchas/{captcha_for_ip[ip]}.png"):
                 os.remove(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png")
         captcha_for_ip[ip] = "".join([choice(
             ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]) for _ in range(6)])
@@ -149,7 +158,7 @@ def board_url(board_name):
         print(f"Медиа: {post.media_name}")
         print(f"Время: {post.time}")
         if ip in captcha_for_ip:
-            if pathlib.Path(f"static/media/captchas/{captcha_for_ip[ip]}.png").is_file():
+            if os.path.isfile(f"static/media/captchas/{captcha_for_ip[ip]}.png"):
                 os.remove(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png")
         captcha_for_ip[ip] = "".join([choice(
             ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]) for _ in range(6)])
@@ -167,7 +176,8 @@ def post_url(board_name, post_id):
     # FOR PYTHONANYWHERE.COM
     if request.method == 'GET':
         if ip in captcha_for_ip:
-            os.remove(f"static/media/captchas/{captcha_for_ip[ip]}.png")
+            if os.path.isfile(f"static/media/captchas/{captcha_for_ip[ip]}.png"):
+                os.remove(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png")
         captcha_for_ip[ip] = "".join([choice(
             ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]) for _ in range(6)])
         image = ImageCaptcha(width=280, height=90)
@@ -248,7 +258,7 @@ def post_url(board_name, post_id):
         print(f"Время: {post.time}")
         print(f"Является ответом на пост с ID {post.parent_post}")
         if ip in captcha_for_ip:
-            if pathlib.Path(f"static/media/captchas/{captcha_for_ip[ip]}.png").is_file():
+            if os.path.isfile(f"static/media/captchas/{captcha_for_ip[ip]}.png"):
                 os.remove(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png")
         captcha_for_ip[ip] = "".join([choice(
             ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]) for _ in range(6)])
@@ -294,8 +304,19 @@ def error502(e):
                            pics=["prichincheskaya_tehnina.png"])
 
 
+def clean_captcha():
+    for currentdir, dirs, files in os.walk("static/media/captchas"):
+        for f in files:
+            if f != ".gitignore" and os.path.isfile(f"static/media/captchas/{f}"):
+                print(f)
+                os.remove(f"static/media/captchas/{f}")
+    print("Вся каптча почищена")
+
+
 def main():
     db_session.global_init("db/imageboard.db")
+    timer = RepeatTimer(2 * 60, clean_captcha)
+    timer.start()
     app.run(host="0.0.0.0")
 
 
@@ -303,4 +324,6 @@ if __name__ == '__main__':
     main()
 
 # db_session.global_init("db/imageboard.db")
+# timer = RepeatTimer(2 * 60, clean_captcha)
+# timer.start()
 # FOR PYTHONANYWHERE.COM
