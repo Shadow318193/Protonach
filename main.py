@@ -9,6 +9,7 @@ import datetime
 from data import db_session
 from data.boards import Boards
 from data.posts import Posts
+from clean_captcha import clean_captcha
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret_key'
@@ -290,17 +291,9 @@ def error502(e):
                            pics=["prichincheskaya_tehnina.png"])
 
 
-def clean_captcha():
-    for currentdir, dirs, files in os.walk("static/media/captchas"):
-        for f in files:
-            if f != ".gitignore" and os.path.isfile(f"static/media/captchas/{f}"):
-                print(f)
-                os.remove(f"static/media/captchas/{f}")
-    print("Вся каптча почищена")
-
-
 def main():
     db_session.global_init("db/imageboard.db")
+    clean_captcha()
     timer = RepeatTimer(2 * 60, clean_captcha)
     timer.start()
     app.run(host="0.0.0.0")
