@@ -310,6 +310,5 @@ if __name__ == '__main__':
     main()
 
 # db_session.global_init("db/imageboard.db")
-# timer = RepeatTimer(2 * 60, clean_captcha)
-# timer.start()
+# clean_captcha()
 # FOR PYTHONANYWHERE.COM
