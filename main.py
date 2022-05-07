@@ -317,7 +317,7 @@ def error500(e):
                            pics=["prichincheskaya_tehnina.png"])
 
 
-if PYTHONANYWHERE:
+if not PYTHONANYWHERE:
     def main():
         db_session.global_init("db/imageboard.db")
         clean_captcha()
