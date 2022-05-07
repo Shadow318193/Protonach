@@ -39,9 +39,11 @@
 
                 <form method="post">
                     <button type="submit" name="like" value="{{ the_post.id }}" class="badge bg-success rounded-pill">
+                        <img src="/static/media/like.png">
                         <div class="whitetext">{{ the_post.likes }}</div>
                     </button>
                     <button type="submit" name="dislike" value="{{ the_post.id }}" class="badge bg-danger rounded-pill">
+                        <img src="/static/media/dislike.png">
                         <div class="whitetext">{{ the_post.dislikes }}</div>
                     </button>
                 </form><br>
@@ -90,9 +92,11 @@
 
                             <form method="post">
                             <button type="submit" name="like" value="{{ post.id }}" class="badge bg-success rounded-pill">
+                                <img src="/static/media/like.png">
                                 <div class="whitetext">{{ post.likes }}</div>
                             </button>
                             <button type="submit" name="dislike" value="{{ post.id }}" class="badge bg-danger rounded-pill">
+                                <img src="/static/media/dislike.png">
                                 <div class="whitetext">{{ post.dislikes }}</div>
                             </button>
                             </form><br>
