@@ -6,7 +6,7 @@ A simple anonymous imageboard where you can post videos and music too.
 - [x] Make the main function — creating posts;
 - [x] Allow users to add media to the posts;
 - [x] Make like and dislike buttons;
-- [x] Protect site from robots by captcha (fixing bugs);
+- [x] Protect site from robots by captcha;
 - [ ] Make admin able to delete posts and ban IPs.
 ## Questions
 > Why Protonach?
