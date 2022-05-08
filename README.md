@@ -8,6 +8,8 @@ A simple anonymous imageboard where you can post videos and music too.
 - [x] Make like and dislike buttons;
 - [x] Protect site from robots by captcha;
 - [ ] Make admin able to delete posts and ban IPs.
+
+**This project is still being developed. I will be happy if you give me some ideas of fixing bugs or adding feautures.**
 ## Questions
 >Why Protonach?
 
@@ -18,5 +20,3 @@ A simple anonymous imageboard where you can post videos and music too.
 >Can I try it?
 
 - Yes! You can visit http://shadow318193.pythonanywhere.com to see the current result of work.
-
-**This project is still being developed. I will be happy if you give me some ideas of fixing bugs or adding feautures.**
