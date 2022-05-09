@@ -1,7 +1,7 @@
 import os
 
 
-def clean_captcha():
+def clear_captcha():
     for currentdir, dirs, files in os.walk("static/media/captchas"):
         for f in files:
             if f != ".gitignore" and os.path.isfile(f"static/media/captchas/{f}"):
@@ -11,4 +11,4 @@ def clean_captcha():
 
 
 if __name__ == "__main__":
-    clean_captcha()
+    clear_captcha()

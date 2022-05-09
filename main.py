@@ -1,7 +1,7 @@
-from flask import Flask, request, render_template, redirect
+from flask import Flask, request, render_template, redirect, abort
 
 from captcha.image import ImageCaptcha
-from clean_captcha import clean_captcha
+from clear_captcha import clear_captcha
 
 from random import choice
 
@@ -57,6 +57,20 @@ accept = ",".join([make_accept_for_html(x) for x in ALLOWED_FILES])
 
 # For correct work of captcha
 captcha_for_ip = {}
+
+# Backdoor
+admin_password = "".join([choice(
+    ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"]
+) for _ in range(16)])
+
+# For admins' ip
+admins = {"127.0.0.1"}
+
+
+def check_admin(ip):
+    if ip in admins:
+        return True
+    return False
 
 
 def allowed_file(filename):
@@ -124,11 +138,10 @@ def board_url(board_name):
             return render_template("board.html", board=board_obj, posts=posts, posts_count=posts.count(),
                                    post_answers=post_answers, image_files=IMAGE_FILES, video_files=VIDEO_FILES,
                                    audio_files=AUDIO_FILES, accept_files=accept,
-                                   captcha=f"/static/media/captchas/{captcha_for_ip[ip]}.png")
+                                   captcha=f"/static/media/captchas/{captcha_for_ip[ip]}.png",
+                                   from_admin=check_admin(ip))
 
-        return render_template("error.html", code=404,
-                               text="К сожалению, данная доска больше недоступна или её не существует.",
-                               pics=PICS_404)
+        return abort(404)
     elif request.method == 'POST':
         if "like" in request.form:
             db_sess = db_session.create_session()
@@ -160,9 +173,31 @@ def board_url(board_name):
                     print(f"С устройства под IP {ip} был оставлен дизлайк посту под ID {p.id}")
             db_sess.commit()
             return redirect(board_name)
+        elif "delete_post" in request.form:
+            if ip in admins:
+                db_sess = db_session.create_session()
+                posts = db_sess.query(Posts).filter(
+                    (Posts.parent_post == request.form["delete_post"]) |
+                    (Posts.id == request.form["delete_post"]))
+                if posts:
+                    for p in posts:
+                        for currentdir, dirs, files in os.walk("static/media/from_users"):
+                            for f in files:
+                                if f == p.media_name and os.path.isfile(f"static/media/from_users/{f}"):
+                                    print(f)
+                                    os.remove(f"static/media/from_users/{f}")
+                        db_sess.delete(p)
+                    db_sess.commit()
+                    print(f"Админом {ip} был удалён пост под ID {request.form['delete_post']}")
+                    return redirect(board_name)
+                else:
+                    abort(404)
 
         if not (request.form["topic"] or request.form["text"] or request.files["file"]) \
                 or request.form["captcha"] != captcha_for_ip[ip]:
+            return redirect(board_name)
+        elif request.form["text"] == f"/admin-{admin_password}":
+            admins.add(ip)
             return redirect(board_name)
 
         post = Posts()
@@ -213,11 +248,10 @@ def post_url(board_name, post_id):
                 return render_template("post.html", board=board_obj, the_post=post_obj, posts=posts,
                                        posts_count=posts.count(), image_files=IMAGE_FILES, video_files=VIDEO_FILES,
                                        audio_files=AUDIO_FILES, accept_files=accept,
-                                       captcha=f"/static/media/captchas/{captcha_for_ip[ip]}.png")
+                                       captcha=f"/static/media/captchas/{captcha_for_ip[ip]}.png",
+                                       from_admin=check_admin(ip))
 
-        return render_template("error.html", code=404,
-                               text="К сожалению, данный тред больше недоступен или его не существует.",
-                               pics=PICS_404)
+        return abort(404)
     elif request.method == 'POST':
         if "like" in request.form:
             db_sess = db_session.create_session()
@@ -249,11 +283,32 @@ def post_url(board_name, post_id):
                     print(f"С устройства под IP {ip} был оставлен дизлайк посту под ID {p.id}")
             db_sess.commit()
             return redirect(post_id)
+        elif "delete_post" in request.form:
+            if ip in admins:
+                db_sess = db_session.create_session()
+                posts = db_sess.query(Posts).filter(
+                    (Posts.parent_post == request.form["delete_post"]) |
+                    (Posts.id == request.form["delete_post"]))
+                if posts:
+                    for p in posts:
+                        for currentdir, dirs, files in os.walk("static/media/from_users"):
+                            for f in files:
+                                if f == p.media_name and os.path.isfile(f"static/media/from_users/{f}"):
+                                    print(f)
+                                    os.remove(f"static/media/from_users/{f}")
+                        db_sess.delete(p)
+                    db_sess.commit()
+                    print(f"Админом {ip} был удалён пост под ID {request.form['delete_post']}")
+                    return redirect(f"/{board_name}")
+                else:
+                    abort(404)
 
         if not (request.form["topic"] or request.form["text"] or request.files["file"]) \
                 or request.form["captcha"] != captcha_for_ip[ip]:
             return redirect(post_id)
-
+        elif request.form["text"] == f"/admin-{admin_password}":
+            admins.add(ip)
+            return redirect(post_id)
         post = Posts()
         post.time = datetime.datetime.now()
         post.poster = ip
@@ -317,11 +372,12 @@ def error500(e):
                            pics=["prichincheskaya_tehnina.png"])
 
 
+print(admin_password)
 if not PYTHONANYWHERE:
     def main():
         db_session.global_init("db/imageboard.db")
-        clean_captcha()
-        timer = RepeatTimer(2 * 60, clean_captcha)
+        clear_captcha()
+        timer = RepeatTimer(2 * 60, clear_captcha)
         timer.start()
         app.run(host="0.0.0.0")
 
@@ -330,4 +386,4 @@ if not PYTHONANYWHERE:
         main()
 else:
     db_session.global_init("db/imageboard.db")
-    clean_captcha()
+    clear_captcha()
