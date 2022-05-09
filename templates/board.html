@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=0.8">
     <link rel="icon" type="image/png" href="/static/media/favicon.png"/>
     <link rel="stylesheet"
           href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
@@ -29,7 +29,7 @@
     </header>
 
     <h1 class="aligncenter">Создать тред</h1>
-            <form class="loginform" method="post" enctype=multipart/form-data>
+            <form class="postform" method="post" enctype=multipart/form-data>
                 <div class="form-group">
                     <label for="topic">Введите тему</label>
                     <textarea class="form-control" id="topic" rows="1" name="topic"></textarea>
@@ -64,7 +64,16 @@
             <div class="postmargin">
 
                 <div class="alert alert-info" role="alert">
-                        Аноним, {{ post.time }}, <b>№{{ post.id }}</b>
+                    {% if from_admin %}
+                        <form method="post">
+                            <div class="ms-2 me-auto">
+                                <button type="submit" name="delete_post" value="{{ post.id }}">Удалить пост</button>
+                                <button type="submit" name="ban" value="{{ post.id }}">Забанить постера</button>
+                            </div>
+                        </form>
+                    {% endif %}
+
+                    Аноним, {{ post.time }}, <b>№{{ post.id }}</b>
 
                         <form method="post">
                             <button type="submit" name="like" value="{{ post.id }}" class="badge bg-success rounded-pill">
@@ -113,11 +122,6 @@
                             {% endif %}
                         </span>
                     </div>
-                    {% if from_admin %}
-                        <form method="post">
-                            <button type="submit" name="delete_post" value="{{ post.id }}">Удалить пост</button>
-                        </form>
-                    {% endif %}
 
                 </div>
 

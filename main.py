@@ -66,6 +66,9 @@ admin_password = "".join([choice(
 # For admins' ip
 admins = {"127.0.0.1"}
 
+# Banned ip: level of ban
+banned_ip = set()
+
 
 def check_admin(ip):
     if ip in admins:
@@ -143,6 +146,8 @@ def board_url(board_name):
 
         return abort(404)
     elif request.method == 'POST':
+        if ip in banned_ip:
+            return redirect(board_name)
         if "like" in request.form:
             db_sess = db_session.create_session()
             post = db_sess.query(Posts).filter(Posts.id == request.form["like"])
@@ -192,6 +197,14 @@ def board_url(board_name):
                     return redirect(board_name)
                 else:
                     abort(404)
+            return redirect(board_name)
+        elif "ban" in request.form:
+            if ip in admins:
+                db_sess = db_session.create_session()
+                post = db_sess.query(Posts).filter(Posts.id == request.form["ban"])
+                for p in post:
+                    if p.poster not in admins:
+                        banned_ip.add(p.poster)
             return redirect(board_name)
 
         if not (request.form["topic"] or request.form["text"] or request.files["file"]) \
@@ -254,6 +267,8 @@ def post_url(board_name, post_id):
 
         return abort(404)
     elif request.method == 'POST':
+        if ip in banned_ip:
+            return redirect(post_id)
         if "like" in request.form:
             db_sess = db_session.create_session()
             post = db_sess.query(Posts).filter(Posts.id == request.form["like"])
@@ -291,7 +306,10 @@ def post_url(board_name, post_id):
                     (Posts.parent_post == request.form["delete_post"]) |
                     (Posts.id == request.form["delete_post"]))
                 if posts:
+                    parent_post = False
                     for p in posts:
+                        if not p.parent_post:
+                            parent_post = True
                         for currentdir, dirs, files in os.walk("static/media/from_users"):
                             for f in files:
                                 if f == p.media_name and os.path.isfile(f"static/media/from_users/{f}"):
@@ -300,9 +318,19 @@ def post_url(board_name, post_id):
                         db_sess.delete(p)
                     db_sess.commit()
                     print(f"Админом {ip} был удалён пост под ID {request.form['delete_post']}")
-                    return redirect(f"/{board_name}")
+                    if parent_post:
+                        return redirect(f"/{board_name}")
+                    return redirect(post_id)
                 else:
                     abort(404)
+            return redirect(post_id)
+        elif "ban" in request.form:
+            if ip in admins:
+                db_sess = db_session.create_session()
+                post = db_sess.query(Posts).filter(Posts.id == request.form["ban"])
+                for p in post:
+                    if p.poster not in admins:
+                        banned_ip.add(p.poster)
             return redirect(post_id)
 
         if not (request.form["topic"] or request.form["text"] or request.files["file"]) \
