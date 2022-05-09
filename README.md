@@ -7,7 +7,7 @@ A simple anonymous imageboard where you can post videos and music too.
 - [x] Allow users to add media to the posts;
 - [x] Make like and dislike buttons;
 - [x] Protect site from robots by captcha;
-- [ ] Make admin able to delete posts and ban IPs.
+- [ ] Make admin able to delete posts (+) and ban IPs (WIP).
 
 **This project is still being developed. I will be happy if you give me some ideas of fixing bugs or adding feautures.**
 ## Questions
