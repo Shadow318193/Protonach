@@ -116,7 +116,7 @@ def index():
 def robots():
     ip = get_ip()
     clear_captcha_from_ip(ip)
-    return f"<pre>{open('robots.txt', 'r').read()}</pre>"
+    return f"{open('robots.txt', 'r').read()}"
 
 
 @app.route("/<board_name>", methods=['POST', 'GET'])
