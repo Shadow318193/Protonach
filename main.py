@@ -205,6 +205,7 @@ def board_url(board_name):
                 for p in post:
                     if p.poster not in admins:
                         banned_ip.add(p.poster)
+                        print(f"Админ {ip} дал бан постеру {p.poster}")
             return redirect(board_name)
 
         if not (request.form["topic"] or request.form["text"] or request.files["file"]) \
@@ -331,6 +332,7 @@ def post_url(board_name, post_id):
                 for p in post:
                     if p.poster not in admins:
                         banned_ip.add(p.poster)
+                        print(f"Админ {ip} дал бан постеру {p.poster}")
             return redirect(post_id)
 
         if not (request.form["topic"] or request.form["text"] or request.files["file"]) \

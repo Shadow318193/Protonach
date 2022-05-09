@@ -141,12 +141,6 @@
                             {% endif %}
 
                             <pre>{{ post.text }}</pre>
-
-                            {% if from_admin %}
-                                <form method="post">
-                                    <button type="submit" name="delete_post" value="{{ post.id }}">Удалить пост</button>
-                                </form>
-                            {% endif %}
                         </div>
 
                     </div>
