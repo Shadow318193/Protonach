@@ -192,6 +192,7 @@ def board_url(board_name):
                     return redirect(board_name)
                 else:
                     abort(404)
+            return redirect(board_name)
 
         if not (request.form["topic"] or request.form["text"] or request.files["file"]) \
                 or request.form["captcha"] != captcha_for_ip[ip]:
@@ -302,6 +303,7 @@ def post_url(board_name, post_id):
                     return redirect(f"/{board_name}")
                 else:
                     abort(404)
+            return redirect(post_id)
 
         if not (request.form["topic"] or request.form["text"] or request.files["file"]) \
                 or request.form["captcha"] != captcha_for_ip[ip]:
