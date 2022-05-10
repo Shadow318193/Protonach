@@ -142,7 +142,7 @@ def board_url(board_name):
                                    post_answers=post_answers, image_files=IMAGE_FILES, video_files=VIDEO_FILES,
                                    audio_files=AUDIO_FILES, accept_files=accept,
                                    captcha=f"/static/media/captchas/{captcha_for_ip[ip]}.png",
-                                   from_admin=check_admin(ip))
+                                   from_admin=check_admin(ip), zone=zone)
 
         return abort(404)
     elif request.method == 'POST':
@@ -264,7 +264,7 @@ def post_url(board_name, post_id):
                                        posts_count=posts.count(), image_files=IMAGE_FILES, video_files=VIDEO_FILES,
                                        audio_files=AUDIO_FILES, accept_files=accept,
                                        captcha=f"/static/media/captchas/{captcha_for_ip[ip]}.png",
-                                       from_admin=check_admin(ip))
+                                       from_admin=check_admin(ip), zone=zone)
 
         return abort(404)
     elif request.method == 'POST':
@@ -406,6 +406,9 @@ def error500(e):
 
 print(admin_password)
 if not PYTHONANYWHERE:
+    zone = "МСК"
+
+
     def main():
         db_session.global_init("db/imageboard.db")
         clear_captcha()
@@ -417,5 +420,6 @@ if not PYTHONANYWHERE:
     if __name__ == '__main__':
         main()
 else:
+    zone = "UTC"
     db_session.global_init("db/imageboard.db")
     clear_captcha()

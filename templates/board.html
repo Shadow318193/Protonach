@@ -73,7 +73,7 @@
                         </form>
                     {% endif %}
 
-                    Аноним, {{ post.time }}, <b>№{{ post.id }}</b>
+                    Аноним, {{ post.time }} {{ zone }}, <b>№{{ post.id }}</b>
 
                         <form method="post">
                             <button type="submit" name="like" value="{{ post.id }}" class="badge bg-success rounded-pill">
