@@ -16,7 +16,7 @@ A simple anonymous imageboard where you can post videos and music too.
 - I'm making Protonach because it's my project in a programming course and I like idea of an imageboard. Thanks 2ch.hk for the inspiration!
 >When the project will be done?
 
-- I don't know. But I must present it's demo on May 13 in the course.
+- I should fix some bugs and remake GUI of the site, so it will take a lot of time.
 >Can I try it?
 
 - Yes! You can visit http://shadow318193.pythonanywhere.com to see the current result of work.
