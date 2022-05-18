@@ -274,8 +274,10 @@ def board_url(board_name):
 
         generate_new_captcha(ip)
         session["message"] = "Пост успешно отправлен."
-        session.pop("topic")
-        session.pop("text")
+        if "topic" in session:
+            session.pop("topic")
+        if "text" in session:
+            session.pop("text")
         return redirect(board_name + "/" + str(post.id))
 
 
@@ -436,8 +438,10 @@ def post_url(board_name, post_id):
 
         generate_new_captcha(ip)
         session["message"] = "Пост успешно отправлен."
-        session.pop("topic")
-        session.pop("text")
+        if "topic" in session:
+            session.pop("topic")
+        if "text" in session:
+            session.pop("text")
         return redirect(post_id)
 
 
