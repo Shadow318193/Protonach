@@ -48,7 +48,7 @@
                     <textarea class="form-control" id="captcha" rows="1" name="captcha"></textarea>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Отправить</button>
+                <button type="submit" class="btn btn-orange">Отправить</button>
             </form>
 
     <h2 class="messagetext"><i>{{ message }}</i></h2>
@@ -114,7 +114,7 @@
 
                     <div class="ms-2 me-auto">
                         <b><a href="/{{board.name}}/{{post.id}}">Войти в тред</a></b>
-                        <span class="badge bg-info rounded-pill">
+                        <span class="badge bg-orange rounded-pill">
                             {% if post_answers[post.id] % 10 == 0 or post_answers[post.id] % 10 >= 5 or (11 <= post_answers[post.id] % 100 <= 19) %}
                             <div class="whitetext">{{ post_answers[post.id] }} ответов</div>
                             {% elif post_answers[post.id] % 10 == 1 %}

@@ -17,6 +17,16 @@
     color: #ffffff;
 }
 
+.bg-orange {
+    background-color: #fd7e14;
+}
+
+.btn-orange {
+    color: #fff;
+    background-color: #fd7e14;
+    border-color: #fd7e14;
+}
+
 .messagetext {
     text-align: center;
     color: #bb4400;
