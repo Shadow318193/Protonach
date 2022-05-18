@@ -30,7 +30,11 @@
 
     <h1 class="aligncenter">Тред-пост №{{ the_post.id }}</h1>
 
+    <h2 class="messagetext"><i>{{ message }}</i></h2>
+
     <div class="boardspadding">
+
+        <h2><a href="/{{ board.name }}">Вернуться на главную страницу доски</a></h2>
 
         <div class="postmargin">
 
@@ -164,11 +168,11 @@
             <form class="postform" method="post" enctype=multipart/form-data>
                 <div class="form-group">
                     <label for="topic">Введите тему</label>
-                    <textarea class="form-control" id="topic" rows="1" name="topic"></textarea>
+                    <textarea class="form-control" id="topic" rows="1" name="topic">{{ topic }}</textarea>
                 </div>
                 <div class="form-group">
                     <label for="text">Введите текст</label>
-                    <textarea class="form-control" id="text" rows="3" name="text"></textarea>
+                    <textarea class="form-control" id="text" rows="3" name="text">{{ text }}</textarea>
                 </div>
                 <div class="form-group">
                     <label for="file">Приложите медиафайл</label>

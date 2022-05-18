@@ -17,6 +17,11 @@
     color: #ffffff;
 }
 
+.messagetext {
+    text-align: center;
+    color: #bb4400;
+}
+
 .childpost {
     padding-left: 10%;
 }
@@ -28,7 +33,6 @@
 .postform {
     margin-left: auto;
     margin-right: auto;
-    margin-bottom: 20px;
     max-width: 450px;
     background-color: #d1ecf1;
     border: 1px solid #bee5eb;
