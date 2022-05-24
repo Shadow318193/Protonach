@@ -79,11 +79,19 @@
 
                         <form method="post">
                             <button type="submit" name="like" value="{{ post.id }}" class="badge bg-success rounded-pill">
+                                {% if ip not in post.raters_like %}
                                 <img src="/static/media/like.png">
+                                {% else %}
+                                <img src="/static/media/like_activated.png">
+                                {% endif %}
                                 <div class="whitetext">{{ post.likes }}</div>
                             </button>
                             <button type="submit" name="dislike" value="{{ post.id }}" class="badge bg-danger rounded-pill">
+                                {% if ip not in post.raters_dislike %}
                                 <img src="/static/media/dislike.png">
+                                {% else %}
+                                <img src="/static/media/dislike_activated.png">
+                                {% endif %}
                                 <div class="whitetext">{{ post.dislikes }}</div>
                             </button>
                         </form><br>

@@ -12,7 +12,7 @@
     <link rel="stylesheet" type="text/css" href="/static/css/stylesheet.css">
 
     <title>Протонач — /{{ board.name }}/, №{{ the_post.id }}</title>
-    <meta name="description" content="{{ board.about }}"/>
+    <meta name="description" content="{{ board.about }} [Тред-пост №{{ the_post.id }}]"/>
 </head>
 
 <body>
@@ -52,11 +52,19 @@
 
                 <form method="post">
                     <button type="submit" name="like" value="{{ the_post.id }}" class="badge bg-success rounded-pill">
+                        {% if ip not in the_post.raters_like %}
                         <img src="/static/media/like.png">
+                        {% else %}
+                        <img src="/static/media/like_activated.png">
+                        {% endif %}
                         <div class="whitetext">{{ the_post.likes }}</div>
                     </button>
                     <button type="submit" name="dislike" value="{{ the_post.id }}" class="badge bg-danger rounded-pill">
+                        {% if ip not in the_post.raters_dislike %}
                         <img src="/static/media/dislike.png">
+                        {% else %}
+                        <img src="/static/media/dislike_activated.png">
+                        {% endif %}
                         <div class="whitetext">{{ the_post.dislikes }}</div>
                     </button>
                 </form><br>
@@ -113,11 +121,19 @@
 
                             <form method="post">
                             <button type="submit" name="like" value="{{ post.id }}" class="badge bg-success rounded-pill">
+                                {% if ip not in post.raters_like %}
                                 <img src="/static/media/like.png">
+                                {% else %}
+                                <img src="/static/media/like_activated.png">
+                                {% endif %}
                                 <div class="whitetext">{{ post.likes }}</div>
                             </button>
                             <button type="submit" name="dislike" value="{{ post.id }}" class="badge bg-danger rounded-pill">
+                                {% if ip not in post.raters_dislike %}
                                 <img src="/static/media/dislike.png">
+                                {% else %}
+                                <img src="/static/media/dislike_activated.png">
+                                {% endif %}
                                 <div class="whitetext">{{ post.dislikes }}</div>
                             </button>
                             </form><br>

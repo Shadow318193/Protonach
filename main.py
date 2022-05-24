@@ -149,7 +149,7 @@ def board_url(board_name):
                                    from_admin=check_admin(ip), zone=zone,
                                    message=session["message"] if "message" in session else "",
                                    topic=session["topic"] if "topic" in session else "",
-                                   text=session["text"] if "text" in session else "",
+                                   text=session["text"] if "text" in session else "", ip=ip
                                    )
 
         return abort(404)
@@ -158,21 +158,22 @@ def board_url(board_name):
             session["message"] = "Извините, но произошли неполадки с каптчей. Попробуйте отправить ваше сообщение " \
                                  "ещё раз."
         if ip in banned_ip:
-            session["message"] = "Доброго времени суток. На вашем IP завёлся нехороший чувак, поэтому с него нельзя " \
-                                 "постить. Спасибо за сотрудничество, оставайтесь анонимом."
+            session["message"] = "Доброго времени суток. C вашего IP больше нельзя постить, потому что там" \
+                                 "завёлся нехороший чувак. Спасибо за сотрудничество, оставайтесь анонимом."
             return redirect(board_name)
+
         if "like" in request.form:
             db_sess = db_session.create_session()
             post = db_sess.query(Posts).filter(Posts.id == request.form["like"])
             for p in post:
-                if ip not in p.raters:
+                if ip not in p.raters_like and ip not in p.raters_dislike:
                     p.likes += 1
-                    if p.raters:
-                        raters = p.raters.split(";")
+                    if p.raters_like:
+                        raters = p.raters_like.split(";")
                         raters.append(ip)
-                        p.raters = ";".join(raters)
+                        p.raters_like = ";".join(raters)
                     else:
-                        p.raters = ip
+                        p.raters_like = ip
                     session["message"] = "Вы поставили лайк."
                     print(f"С устройства под IP {ip} был оставлен лайк посту под ID {p.id}")
                 else:
@@ -183,20 +184,21 @@ def board_url(board_name):
             db_sess = db_session.create_session()
             post = db_sess.query(Posts).filter(Posts.id == request.form["dislike"])
             for p in post:
-                if ip not in p.raters:
+                if ip not in p.raters_like and ip not in p.raters_dislike:
                     p.dislikes += 1
-                    if p.raters:
-                        raters = p.raters.split(";")
+                    if p.raters_dislike:
+                        raters = p.raters_dislike.split(";")
                         raters.append(ip)
-                        p.raters = ";".join(raters)
+                        p.raters_dislike = ";".join(raters)
                     else:
-                        p.raters = ip
+                        p.raters_dislike = ip
                     session["message"] = "Вы поставили дизлайк."
                     print(f"С устройства под IP {ip} был оставлен дизлайк посту под ID {p.id}")
                 else:
                     session["message"] = "Вы уже поставили оценку."
             db_sess.commit()
             return redirect(board_name)
+
         elif "delete_post" in request.form:
             if ip in admins:
                 db_sess = db_session.create_session()
@@ -207,7 +209,7 @@ def board_url(board_name):
                     for p in posts:
                         for currentdir, dirs, files in os.walk("static/media/from_users"):
                             for f in files:
-                                if f == p.media_name and os.path.isfile(f"static/media/from_users/{f}"):
+                                if f == p.media and os.path.isfile(f"static/media/from_users/{f}"):
                                     print(f)
                                     os.remove(f"static/media/from_users/{f}")
                         db_sess.delete(p)
@@ -229,6 +231,8 @@ def board_url(board_name):
                         banned_ip.add(p.poster)
                         session["message"] = "Вы забанили постера."
                         print(f"Админ {ip} дал бан постеру {p.poster}")
+                    else:
+                        session["message"] = "Вы пытались забанить админа. Так нельзя."
             else:
                 session["message"] = "Вы не админ."
             return redirect(board_name)
@@ -304,13 +308,13 @@ def post_url(board_name, post_id):
                                        from_admin=check_admin(ip), zone=zone,
                                        message=session["message"] if "message" in session else "",
                                        topic=session["topic"] if "topic" in session else "",
-                                       text=session["text"] if "text" in session else "",)
+                                       text=session["text"] if "text" in session else "", ip=ip)
 
         return abort(404)
     elif request.method == 'POST':
         if ip in banned_ip:
-            session["message"] = "Доброго времени суток. На вашем IP завёлся нехороший чувак, поэтому с него нельзя " \
-                                 "постить. Спасибо за сотрудничество, оставайтесь анонимом."
+            session["message"] = "Доброго времени суток. C вашего IP больше нельзя постить, потому что там" \
+                                 "завёлся нехороший чувак. Спасибо за сотрудничество, оставайтесь анонимом."
             return redirect(post_id)
         for elem in request.form:
             session[elem] = request.form[elem]
@@ -323,14 +327,14 @@ def post_url(board_name, post_id):
             db_sess = db_session.create_session()
             post = db_sess.query(Posts).filter(Posts.id == request.form["like"])
             for p in post:
-                if ip not in p.raters:
+                if ip not in p.raters_like and ip not in p.raters_dislike:
                     p.likes += 1
-                    if p.raters:
-                        raters = p.raters.split(";")
+                    if p.raters_like:
+                        raters = p.raters_like.split(";")
                         raters.append(ip)
-                        p.raters = ";".join(raters)
+                        p.raters_like = ";".join(raters)
                     else:
-                        p.raters = ip
+                        p.raters_like = ip
                     session["message"] = "Вы поставили лайк."
                     print(f"С устройства под IP {ip} был оставлен лайк посту под ID {p.id}")
                 else:
@@ -341,20 +345,21 @@ def post_url(board_name, post_id):
             db_sess = db_session.create_session()
             post = db_sess.query(Posts).filter(Posts.id == request.form["dislike"])
             for p in post:
-                if ip not in p.raters:
+                if ip not in p.raters_like and ip not in p.raters_dislike:
                     p.dislikes += 1
-                    if p.raters:
-                        raters = p.raters.split(";")
+                    if p.raters_dislike:
+                        raters = p.raters_dislike.split(";")
                         raters.append(ip)
-                        p.raters = ";".join(raters)
+                        p.raters_dislike = ";".join(raters)
                     else:
-                        p.raters = ip
+                        p.raters_dislike = ip
                     session["message"] = "Вы поставили дизлайк."
                     print(f"С устройства под IP {ip} был оставлен дизлайк посту под ID {p.id}")
                 else:
                     session["message"] = "Вы уже поставили оценку."
             db_sess.commit()
             return redirect(post_id)
+
         elif "delete_post" in request.form:
             if ip in admins:
                 db_sess = db_session.create_session()
@@ -368,7 +373,7 @@ def post_url(board_name, post_id):
                             parent_post = True
                         for currentdir, dirs, files in os.walk("static/media/from_users"):
                             for f in files:
-                                if f == p.media_name and os.path.isfile(f"static/media/from_users/{f}"):
+                                if f == p.media and os.path.isfile(f"static/media/from_users/{f}"):
                                     print(f)
                                     os.remove(f"static/media/from_users/{f}")
                         db_sess.delete(p)
@@ -392,6 +397,8 @@ def post_url(board_name, post_id):
                         banned_ip.add(p.poster)
                         session["message"] = "Вы забанили постера."
                         print(f"Админ {ip} дал бан постеру {p.poster}")
+                    else:
+                        session["message"] = "Вы пытались забанить админа. Так нельзя."
             else:
                 session["message"] = "Вы не админ."
             return redirect(post_id)
