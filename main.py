@@ -14,18 +14,19 @@ import datetime
 from data import db_session
 from data.boards import Boards
 from data.posts import Posts
+from data.users import Users
 
 # CONFIGURATION
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret_key'
 app.config['UPLOAD_FOLDER'] = 'static/media/from_users'
-app.config['MAX_CONTENT_LENGTH'] = 128 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 64 * 1024 * 1024
 
 IMAGE_FILES = ["png", "jpg", "jpeg", "gif", "jfif", "pjpeg", "pjp", "jpe", "webp"]
 VIDEO_FILES = ["webm", "mp4", "m4v"]
 AUDIO_FILES = ["mp3", "wav"]
 
-PICS_404 = ["crab-rave.gif", "mario.gif"]
+PICS_404 = ["mario.gif"]
 PICS_413 = ["too_cool_and_dangerous.gif", "over9000.png"]
 
 ALLOWED_FILES = IMAGE_FILES + VIDEO_FILES + AUDIO_FILES
@@ -63,16 +64,20 @@ admin_password = "".join([choice(
     ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"]
 ) for _ in range(16)])
 
-# For admins' ip
-admins = {"127.0.0.1"}
-
-# Banned ip
-banned_ip = set()
-
 
 def check_admin(ip):
-    if ip in admins:
-        return True
+    db_sess = db_session.create_session()
+    user = db_sess.query(Users).filter(Users.ip == ip)
+    for u in user:
+        return u.admin_level
+    return 0
+
+
+def check_ban(ip):
+    db_sess = db_session.create_session()
+    user = db_sess.query(Users).filter(Users.ip == ip)
+    for u in user:
+        return u.is_banned
     return False
 
 
@@ -101,6 +106,13 @@ def get_ip():
     if PYTHONANYWHERE:
         return request.headers['X-Real-IP']
     return request.remote_addr
+
+
+def clear_cookies():
+    if "topic" in session:
+        session.pop("topic")
+    if "text" in session:
+        session.pop("text")
 
 
 @app.route("/")
@@ -133,6 +145,9 @@ def board_url(board_name):
     if request.method == 'GET':
         generate_new_captcha(ip)
 
+        for elem in request.form:
+            session[elem] = request.form[elem]
+
         db_sess = db_session.create_session()
         board_select = db_sess.query(Boards).filter(Boards.name == board_name)
         for board_obj in board_select:
@@ -154,13 +169,17 @@ def board_url(board_name):
 
         return abort(404)
     elif request.method == 'POST':
+        if check_ban(ip):
+            session["message"] = "Доброго времени суток. C вашего IP больше нельзя постить, потому что там " \
+                                 "завёлся нехороший чувак. Спасибо за сотрудничество, оставайтесь анонимом."
+            return redirect(board_name)
+
+        for elem in request.form:
+            session[elem] = request.form[elem]
+
         if ip not in captcha_for_ip:
             session["message"] = "Извините, но произошли неполадки с каптчей. Попробуйте отправить ваше сообщение " \
                                  "ещё раз."
-        if ip in banned_ip:
-            session["message"] = "Доброго времени суток. C вашего IP больше нельзя постить, потому что там" \
-                                 "завёлся нехороший чувак. Спасибо за сотрудничество, оставайтесь анонимом."
-            return redirect(board_name)
 
         if "like" in request.form:
             db_sess = db_session.create_session()
@@ -200,7 +219,7 @@ def board_url(board_name):
             return redirect(board_name)
 
         elif "delete_post" in request.form:
-            if ip in admins:
+            if check_admin(ip):
                 db_sess = db_session.create_session()
                 posts = db_sess.query(Posts).filter(
                     (Posts.parent_post == request.form["delete_post"]) |
@@ -223,16 +242,32 @@ def board_url(board_name):
                 session["message"] = "Вы не админ."
             return redirect(board_name)
         elif "ban" in request.form:
-            if ip in admins:
+            if check_admin(ip):
                 db_sess = db_session.create_session()
                 post = db_sess.query(Posts).filter(Posts.id == request.form["ban"])
                 for p in post:
-                    if p.poster not in admins:
-                        banned_ip.add(p.poster)
-                        session["message"] = "Вы забанили постера."
-                        print(f"Админ {ip} дал бан постеру {p.poster}")
-                    else:
-                        session["message"] = "Вы пытались забанить админа. Так нельзя."
+                    user = db_sess.query(Users).filter(Users.ip == p.poster)
+                    for u in user:
+                        if not u.is_banned:
+                            if check_admin(p.poster) < check_admin(ip):
+                                u.is_banned = 1
+                                db_sess.commit()
+                                session["message"] = "Вы забанили постера."
+                                print(f"Админ {ip} дал бан постеру {p.poster}")
+                            else:
+                                session["message"] = "Вы пытались забанить админа, равного или " \
+                                                     "высшего по уровню. Так нельзя."
+                                return redirect(board_name)
+                        else:
+                            session["message"] = "Постер уже забанен."
+                            return redirect(board_name)
+                    u = Users()
+                    u.ip = p.poster
+                    u.is_banned = 1
+                    db_sess.add(u)
+                    db_sess.commit()
+                    session["message"] = "Вы забанили постера."
+                    print(f"Админ {ip} дал бан постеру {p.poster}")
             else:
                 session["message"] = "Вы не админ."
             return redirect(board_name)
@@ -244,8 +279,18 @@ def board_url(board_name):
             session["message"] = "Пост не отправлен: ничего не заполнено."
             return redirect(board_name)
         elif request.form["text"] == f"/admin-{admin_password}":
-            admins.add(ip)
-            session["message"] = "Админка получена успешно."
+            if check_admin(ip):
+                session["message"] = "Вы уже админ."
+            else:
+                user = Users()
+                user.ip = ip
+                user.admin_level = 1
+                db_sess = db_session.create_session()
+                db_sess.add(user)
+                db_sess.commit()
+                print(f"{ip} получил админку с помощью команды")
+                session["message"] = "Админка получена успешно."
+            clear_cookies()
             return redirect(board_name)
         elif "/admin-" in request.form["text"]:
             session["message"] = "Неправильный пароль."
@@ -278,10 +323,7 @@ def board_url(board_name):
 
         generate_new_captcha(ip)
         session["message"] = "Пост успешно отправлен."
-        if "topic" in session:
-            session.pop("topic")
-        if "text" in session:
-            session.pop("text")
+        clear_cookies()
         return redirect(board_name + "/" + str(post.id))
 
 
@@ -291,6 +333,9 @@ def post_url(board_name, post_id):
 
     if request.method == 'GET':
         generate_new_captcha(ip)
+
+        for elem in request.form:
+            session[elem] = request.form[elem]
 
         db_sess = db_session.create_session()
         board_select = db_sess.query(Boards).filter(Boards.name == board_name)
@@ -312,12 +357,14 @@ def post_url(board_name, post_id):
 
         return abort(404)
     elif request.method == 'POST':
-        if ip in banned_ip:
-            session["message"] = "Доброго времени суток. C вашего IP больше нельзя постить, потому что там" \
+        if check_ban(ip):
+            session["message"] = "Доброго времени суток. C вашего IP больше нельзя постить, потому что там " \
                                  "завёлся нехороший чувак. Спасибо за сотрудничество, оставайтесь анонимом."
             return redirect(post_id)
+
         for elem in request.form:
             session[elem] = request.form[elem]
+
         if ip not in captcha_for_ip:
             session["message"] = "Извините, но произошли неполадки с каптчей. Попробуйте отправить ваше сообщение " \
                                  "ещё раз."
@@ -361,7 +408,7 @@ def post_url(board_name, post_id):
             return redirect(post_id)
 
         elif "delete_post" in request.form:
-            if ip in admins:
+            if check_admin(ip):
                 db_sess = db_session.create_session()
                 posts = db_sess.query(Posts).filter(
                     (Posts.parent_post == request.form["delete_post"]) |
@@ -389,16 +436,32 @@ def post_url(board_name, post_id):
                 session["message"] = "Вы не админ."
             return redirect(post_id)
         elif "ban" in request.form:
-            if ip in admins:
+            if check_admin(ip):
                 db_sess = db_session.create_session()
                 post = db_sess.query(Posts).filter(Posts.id == request.form["ban"])
                 for p in post:
-                    if p.poster not in admins:
-                        banned_ip.add(p.poster)
-                        session["message"] = "Вы забанили постера."
-                        print(f"Админ {ip} дал бан постеру {p.poster}")
-                    else:
-                        session["message"] = "Вы пытались забанить админа. Так нельзя."
+                    user = db_sess.query(Users).filter(Users.ip == p.poster)
+                    for u in user:
+                        if not u.is_banned:
+                            if check_admin(p.poster) < check_admin(ip):
+                                u.is_banned = 1
+                                db_sess.commit()
+                                session["message"] = "Вы забанили постера."
+                                print(f"Админ {ip} дал бан постеру {p.poster}")
+                            else:
+                                session["message"] = "Вы пытались забанить админа, равного или " \
+                                                     "высшего по уровню. Так нельзя."
+                                return redirect(post_id)
+                        else:
+                            session["message"] = "Постер уже забанен."
+                            return redirect(post_id)
+                    u = Users()
+                    u.ip = p.poster
+                    u.is_banned = 1
+                    db_sess.add(u)
+                    db_sess.commit()
+                    session["message"] = "Вы забанили постера."
+                    print(f"Админ {ip} дал бан постеру {p.poster}")
             else:
                 session["message"] = "Вы не админ."
             return redirect(post_id)
@@ -410,8 +473,18 @@ def post_url(board_name, post_id):
             session["message"] = "Пост не отправлен: ничего не заполнено."
             return redirect(post_id)
         elif request.form["text"] == f"/admin-{admin_password}":
-            admins.add(ip)
-            session["message"] = "Админка получена успешно."
+            if check_admin(ip):
+                session["message"] = "Вы уже админ."
+            else:
+                user = Users()
+                user.ip = ip
+                user.admin_level = 1
+                db_sess = db_session.create_session()
+                db_sess.add(user)
+                db_sess.commit()
+                print(f"{ip} получил админку с помощью команды")
+                session["message"] = "Админка получена успешно."
+            clear_cookies()
             return redirect(post_id)
         elif "/admin-" in request.form["text"]:
             session["message"] = "Неправильный пароль."
@@ -445,10 +518,7 @@ def post_url(board_name, post_id):
 
         generate_new_captcha(ip)
         session["message"] = "Пост успешно отправлен."
-        if "topic" in session:
-            session.pop("topic")
-        if "text" in session:
-            session.pop("text")
+        clear_cookies()
         return redirect(post_id)
 
 
