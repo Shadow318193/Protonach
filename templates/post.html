@@ -48,7 +48,7 @@
                     </form>
                 {% endif %}
 
-                Аноним, {{ the_post.time }} {{ zone }}, <b>№{{ the_post.id }}</b>
+                Аноним, {{ the_post.time_to_show }} {{ zone }}, <b>№{{ the_post.id }}</b>
 
                 <form method="post">
                     <button type="submit" name="like" value="{{ the_post.id }}" class="badge bg-success rounded-pill">
@@ -117,7 +117,7 @@
                                 </form>
                             {% endif %}
 
-                            Аноним, {{ post.time }} {{ zone }}, <b>№{{ post.id }}</b>
+                            Аноним, {{ post.time_to_show }} {{ zone }}, <b>№{{ post.id }}</b>
 
                             <form method="post">
                             <button type="submit" name="like" value="{{ post.id }}" class="badge bg-success rounded-pill">

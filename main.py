@@ -120,6 +120,186 @@ def clear_cookies():
         session.pop("text")
 
 
+def post_method(ip, form, files, board_name, post_id=None):
+    if post_id == None:
+        link = board_name
+    else:
+        link = post_id
+
+    if check_ban(ip):
+        session["message"] = "Доброго времени суток. C вашего IP больше нельзя постить, потому что там " \
+                             "завёлся нехороший чувак. Спасибо за сотрудничество, оставайтесь анонимом."
+        return link
+
+    for elem in form:
+        session[elem] = form[elem]
+
+    if ip not in captcha_for_ip:
+        session["message"] = "Извините, но произошли неполадки с каптчей. Попробуйте отправить ваше сообщение " \
+                             "ещё раз."
+        return link
+
+    if "like" in form:
+        db_sess = db_session.create_session()
+        post = db_sess.query(Posts).filter(Posts.id == form["like"])
+        for p in post:
+            if ip not in p.raters_like and ip not in p.raters_dislike:
+                p.likes += 1
+                if p.raters_like:
+                    raters = p.raters_like.split(";")
+                    raters.append(ip)
+                    p.raters_like = ";".join(raters)
+                else:
+                    p.raters_like = ip
+                session["message"] = "Вы поставили лайк."
+                print(f"С устройства под IP {ip} был оставлен лайк посту под ID {p.id}")
+            else:
+                session["message"] = "Вы уже поставили оценку."
+        db_sess.commit()
+        return link
+    elif "dislike" in form:
+        db_sess = db_session.create_session()
+        post = db_sess.query(Posts).filter(Posts.id == form["dislike"])
+        for p in post:
+            if ip not in p.raters_like and ip not in p.raters_dislike:
+                p.dislikes += 1
+                if p.raters_dislike:
+                    raters = p.raters_dislike.split(";")
+                    raters.append(ip)
+                    p.raters_dislike = ";".join(raters)
+                else:
+                    p.raters_dislike = ip
+                session["message"] = "Вы поставили дизлайк."
+                print(f"С устройства под IP {ip} был оставлен дизлайк посту под ID {p.id}")
+            else:
+                session["message"] = "Вы уже поставили оценку."
+        db_sess.commit()
+        return link
+
+    elif "delete_post" in form:
+        if check_admin(ip):
+            db_sess = db_session.create_session()
+            posts = db_sess.query(Posts).filter(
+                (Posts.parent_post == form["delete_post"]) |
+                (Posts.id == form["delete_post"]))
+            if posts:
+                parent_post = False
+                for p in posts:
+                    if not p.parent_post:
+                        parent_post = True
+                    for currentdir, dirs, files in os.walk("static/media/from_users"):
+                        for f in files:
+                            if f == p.media and os.path.isfile(f"static/media/from_users/{f}"):
+                                print(f)
+                                os.remove(f"static/media/from_users/{f}")
+                    db_sess.delete(p)
+                db_sess.commit()
+                session["message"] = "Вы удалили пост."
+                print(f"Админом {ip} был удалён пост под ID {form['delete_post']}")
+                if parent_post:
+                    return f"/{board_name}"
+                return link
+            else:
+                abort(404)
+        else:
+            session["message"] = "Вы не админ."
+        return link
+    elif "ban" in form:
+        if check_admin(ip):
+            db_sess = db_session.create_session()
+            post = db_sess.query(Posts).filter(Posts.id == form["ban"])
+            for p in post:
+                user = db_sess.query(Users).filter(Users.ip == p.poster)
+                for u in user:
+                    if not u.is_banned:
+                        if check_admin(p.poster) < check_admin(ip):
+                            u.is_banned = 1
+                            db_sess.commit()
+                            session["message"] = "Вы забанили постера."
+                            print(f"Админ {ip} дал бан постеру {p.poster}")
+                        else:
+                            session["message"] = "Вы пытались забанить админа, равного или " \
+                                                 "высшего по уровню. Так нельзя."
+                            return link
+                    else:
+                        session["message"] = "Постер уже забанен."
+                        return link
+                u = Users()
+                u.ip = p.poster
+                u.is_banned = 1
+                db_sess.add(u)
+                db_sess.commit()
+                session["message"] = "Вы забанили постера."
+                print(f"Админ {ip} дал бан постеру {p.poster}")
+        else:
+            session["message"] = "Вы не админ."
+        return link
+
+    if form["captcha"] != captcha_for_ip[ip][0]:
+        session["message"] = "Пост не отправлен: каптча заполнена неправильно."
+        return link
+    elif time.time() - captcha_for_ip[ip][1] < CAPTCHA_MIN_TIME:
+        session["message"] = "Вы слишком быстро ввели каптчу, поэтому сервер посчитал, что вы бот. " \
+                             "Попробуйте ввести ещё раз, но медленнее."
+        return link
+    elif not (form["topic"] or form["text"] or files["file"]):
+        session["message"] = "Пост не отправлен: ничего не заполнено."
+        return link
+    elif form["text"] == f"/admin-{admin_password}":
+        if check_admin(ip):
+            session["message"] = "Вы уже админ."
+        else:
+            user = Users()
+            user.ip = ip
+            user.admin_level = 1
+            db_sess = db_session.create_session()
+            db_sess.add(user)
+            db_sess.commit()
+            print(f"{ip} получил админку с помощью команды")
+            session["message"] = "Админка получена успешно."
+        clear_cookies()
+        return link
+    elif "/admin-" in form["text"]:
+        session["message"] = "Неправильный пароль."
+        return link
+    post = Posts()
+    post.time = datetime.datetime.now()
+    post.time_to_show = str(post.time)[:19]
+    post.poster = ip
+    if post_id != None:
+        post.parent_post = post_id
+    post.topic = form["topic"]
+    post.text = form["text"]
+    file = files["file"]
+    if file and allowed_file(file.filename):
+        filename = str(post.time).replace(" ", "-").replace(".", "-").replace(":", "-").lower() + \
+                   "." + file.filename.rsplit('.', 1)[1].lower()
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        post.media = filename
+        post.media_type = filename.rsplit('.', 1)[1].lower()
+        post.media_name = file.filename
+    post.board_name = board_name
+    db_sess = db_session.create_session()
+    db_sess.add(post)
+    db_sess.commit()
+
+    print(f"С устройства под IP {ip} было отправлено сообщение следующего содержания:")
+    print(f"ID поста: {post.id}")
+    print(f"Заголовок: {post.topic}")
+    print(f"Основной текст: {post.text}")
+    print(f"Медиа: {post.media_name}")
+    print(f"Время: {post.time}")
+    print(f"Является ответом на пост под ID {post.parent_post}")
+
+    generate_new_captcha(ip)
+    session["message"] = "Пост успешно отправлен."
+    clear_cookies()
+    if post_id == None:
+        return link + "/" + str(post.id)
+    else:
+        return link
+
+
 @app.route("/")
 def index():
     ip = get_ip()
@@ -174,166 +354,7 @@ def board_url(board_name):
 
         return abort(404)
     elif request.method == 'POST':
-        if check_ban(ip):
-            session["message"] = "Доброго времени суток. C вашего IP больше нельзя постить, потому что там " \
-                                 "завёлся нехороший чувак. Спасибо за сотрудничество, оставайтесь анонимом."
-            return redirect(board_name)
-
-        for elem in request.form:
-            session[elem] = request.form[elem]
-
-        if ip not in captcha_for_ip:
-            session["message"] = "Извините, но произошли неполадки с каптчей. Попробуйте отправить ваше сообщение " \
-                                 "ещё раз."
-
-        if "like" in request.form:
-            db_sess = db_session.create_session()
-            post = db_sess.query(Posts).filter(Posts.id == request.form["like"])
-            for p in post:
-                if ip not in p.raters_like and ip not in p.raters_dislike:
-                    p.likes += 1
-                    if p.raters_like:
-                        raters = p.raters_like.split(";")
-                        raters.append(ip)
-                        p.raters_like = ";".join(raters)
-                    else:
-                        p.raters_like = ip
-                    session["message"] = "Вы поставили лайк."
-                    print(f"С устройства под IP {ip} был оставлен лайк посту под ID {p.id}")
-                else:
-                    session["message"] = "Вы уже поставили оценку."
-            db_sess.commit()
-            return redirect(board_name)
-        elif "dislike" in request.form:
-            db_sess = db_session.create_session()
-            post = db_sess.query(Posts).filter(Posts.id == request.form["dislike"])
-            for p in post:
-                if ip not in p.raters_like and ip not in p.raters_dislike:
-                    p.dislikes += 1
-                    if p.raters_dislike:
-                        raters = p.raters_dislike.split(";")
-                        raters.append(ip)
-                        p.raters_dislike = ";".join(raters)
-                    else:
-                        p.raters_dislike = ip
-                    session["message"] = "Вы поставили дизлайк."
-                    print(f"С устройства под IP {ip} был оставлен дизлайк посту под ID {p.id}")
-                else:
-                    session["message"] = "Вы уже поставили оценку."
-            db_sess.commit()
-            return redirect(board_name)
-
-        elif "delete_post" in request.form:
-            if check_admin(ip):
-                db_sess = db_session.create_session()
-                posts = db_sess.query(Posts).filter(
-                    (Posts.parent_post == request.form["delete_post"]) |
-                    (Posts.id == request.form["delete_post"]))
-                if posts:
-                    for p in posts:
-                        for currentdir, dirs, files in os.walk("static/media/from_users"):
-                            for f in files:
-                                if f == p.media and os.path.isfile(f"static/media/from_users/{f}"):
-                                    print(f)
-                                    os.remove(f"static/media/from_users/{f}")
-                        db_sess.delete(p)
-                    db_sess.commit()
-                    session["message"] = "Вы удалили пост."
-                    print(f"Админом {ip} был удалён пост под ID {request.form['delete_post']}")
-                    return redirect(board_name)
-                else:
-                    abort(404)
-            else:
-                session["message"] = "Вы не админ."
-            return redirect(board_name)
-        elif "ban" in request.form:
-            if check_admin(ip):
-                db_sess = db_session.create_session()
-                post = db_sess.query(Posts).filter(Posts.id == request.form["ban"])
-                for p in post:
-                    user = db_sess.query(Users).filter(Users.ip == p.poster)
-                    for u in user:
-                        if not u.is_banned:
-                            if check_admin(p.poster) < check_admin(ip):
-                                u.is_banned = 1
-                                db_sess.commit()
-                                session["message"] = "Вы забанили постера."
-                                print(f"Админ {ip} дал бан постеру {p.poster}")
-                            else:
-                                session["message"] = "Вы пытались забанить админа, равного или " \
-                                                     "высшего по уровню. Так нельзя."
-                                return redirect(board_name)
-                        else:
-                            session["message"] = "Постер уже забанен."
-                            return redirect(board_name)
-                    u = Users()
-                    u.ip = p.poster
-                    u.is_banned = 1
-                    db_sess.add(u)
-                    db_sess.commit()
-                    session["message"] = "Вы забанили постера."
-                    print(f"Админ {ip} дал бан постеру {p.poster}")
-            else:
-                session["message"] = "Вы не админ."
-            return redirect(board_name)
-
-        if request.form["captcha"] != captcha_for_ip[ip][0]:
-            session["message"] = "Пост не отправлен: каптча заполнена неправильно."
-            return redirect(board_name)
-        elif time.time() - captcha_for_ip[ip][1] < CAPTCHA_MIN_TIME:
-            session["message"] = "Вы слишком быстро ввели каптчу, поэтому сервер посчитал, что вы бот. " \
-                                 "Попробуйте ввести ещё раз, но медленнее."
-            return redirect(board_name)
-        elif not (request.form["topic"] or request.form["text"] or request.files["file"]):
-            session["message"] = "Пост не отправлен: ничего не заполнено."
-            return redirect(board_name)
-        elif request.form["text"] == f"/admin-{admin_password}":
-            if check_admin(ip):
-                session["message"] = "Вы уже админ."
-            else:
-                user = Users()
-                user.ip = ip
-                user.admin_level = 1
-                db_sess = db_session.create_session()
-                db_sess.add(user)
-                db_sess.commit()
-                print(f"{ip} получил админку с помощью команды")
-                session["message"] = "Админка получена успешно."
-            clear_cookies()
-            return redirect(board_name)
-        elif "/admin-" in request.form["text"]:
-            session["message"] = "Неправильный пароль."
-            return redirect(board_name)
-
-        post = Posts()
-        post.time = datetime.datetime.now()
-        post.poster = ip
-        post.topic = request.form["topic"]
-        post.text = request.form["text"]
-        file = request.files["file"]
-        if file and allowed_file(file.filename):
-            filename = str(post.time).replace(" ", "-").replace(".", "-").replace(":", "-").lower() + \
-                       "." + file.filename.rsplit('.', 1)[1].lower()
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            post.media = filename
-            post.media_type = filename.rsplit('.', 1)[1].lower()
-            post.media_name = file.filename
-        post.board_name = board_name
-        db_sess = db_session.create_session()
-        db_sess.add(post)
-        db_sess.commit()
-
-        print(f"С устройства под IP {ip} было отправлено сообщение следующего содержания:")
-        print(f"ID поста: {post.id}")
-        print(f"Заголовок: {post.topic}")
-        print(f"Основной текст: {post.text}")
-        print(f"Медиа: {post.media_name}")
-        print(f"Время: {post.time}")
-
-        generate_new_captcha(ip)
-        session["message"] = "Пост успешно отправлен."
-        clear_cookies()
-        return redirect(board_name + "/" + str(post.id))
+        return redirect(post_method(ip, request.form, request.files, board_name))
 
 
 @app.route("/<board_name>/<post_id>", methods=['POST', 'GET'])
@@ -366,173 +387,7 @@ def post_url(board_name, post_id):
 
         return abort(404)
     elif request.method == 'POST':
-        if check_ban(ip):
-            session["message"] = "Доброго времени суток. C вашего IP больше нельзя постить, потому что там " \
-                                 "завёлся нехороший чувак. Спасибо за сотрудничество, оставайтесь анонимом."
-            return redirect(post_id)
-
-        for elem in request.form:
-            session[elem] = request.form[elem]
-
-        if ip not in captcha_for_ip:
-            session["message"] = "Извините, но произошли неполадки с каптчей. Попробуйте отправить ваше сообщение " \
-                                 "ещё раз."
-            return redirect(post_id)
-
-        if "like" in request.form:
-            db_sess = db_session.create_session()
-            post = db_sess.query(Posts).filter(Posts.id == request.form["like"])
-            for p in post:
-                if ip not in p.raters_like and ip not in p.raters_dislike:
-                    p.likes += 1
-                    if p.raters_like:
-                        raters = p.raters_like.split(";")
-                        raters.append(ip)
-                        p.raters_like = ";".join(raters)
-                    else:
-                        p.raters_like = ip
-                    session["message"] = "Вы поставили лайк."
-                    print(f"С устройства под IP {ip} был оставлен лайк посту под ID {p.id}")
-                else:
-                    session["message"] = "Вы уже поставили оценку."
-            db_sess.commit()
-            return redirect(post_id)
-        elif "dislike" in request.form:
-            db_sess = db_session.create_session()
-            post = db_sess.query(Posts).filter(Posts.id == request.form["dislike"])
-            for p in post:
-                if ip not in p.raters_like and ip not in p.raters_dislike:
-                    p.dislikes += 1
-                    if p.raters_dislike:
-                        raters = p.raters_dislike.split(";")
-                        raters.append(ip)
-                        p.raters_dislike = ";".join(raters)
-                    else:
-                        p.raters_dislike = ip
-                    session["message"] = "Вы поставили дизлайк."
-                    print(f"С устройства под IP {ip} был оставлен дизлайк посту под ID {p.id}")
-                else:
-                    session["message"] = "Вы уже поставили оценку."
-            db_sess.commit()
-            return redirect(post_id)
-
-        elif "delete_post" in request.form:
-            if check_admin(ip):
-                db_sess = db_session.create_session()
-                posts = db_sess.query(Posts).filter(
-                    (Posts.parent_post == request.form["delete_post"]) |
-                    (Posts.id == request.form["delete_post"]))
-                if posts:
-                    parent_post = False
-                    for p in posts:
-                        if not p.parent_post:
-                            parent_post = True
-                        for currentdir, dirs, files in os.walk("static/media/from_users"):
-                            for f in files:
-                                if f == p.media and os.path.isfile(f"static/media/from_users/{f}"):
-                                    print(f)
-                                    os.remove(f"static/media/from_users/{f}")
-                        db_sess.delete(p)
-                    db_sess.commit()
-                    session["message"] = "Вы удалили пост."
-                    print(f"Админом {ip} был удалён пост под ID {request.form['delete_post']}")
-                    if parent_post:
-                        return redirect(f"/{board_name}")
-                    return redirect(post_id)
-                else:
-                    abort(404)
-            else:
-                session["message"] = "Вы не админ."
-            return redirect(post_id)
-        elif "ban" in request.form:
-            if check_admin(ip):
-                db_sess = db_session.create_session()
-                post = db_sess.query(Posts).filter(Posts.id == request.form["ban"])
-                for p in post:
-                    user = db_sess.query(Users).filter(Users.ip == p.poster)
-                    for u in user:
-                        if not u.is_banned:
-                            if check_admin(p.poster) < check_admin(ip):
-                                u.is_banned = 1
-                                db_sess.commit()
-                                session["message"] = "Вы забанили постера."
-                                print(f"Админ {ip} дал бан постеру {p.poster}")
-                            else:
-                                session["message"] = "Вы пытались забанить админа, равного или " \
-                                                     "высшего по уровню. Так нельзя."
-                                return redirect(post_id)
-                        else:
-                            session["message"] = "Постер уже забанен."
-                            return redirect(post_id)
-                    u = Users()
-                    u.ip = p.poster
-                    u.is_banned = 1
-                    db_sess.add(u)
-                    db_sess.commit()
-                    session["message"] = "Вы забанили постера."
-                    print(f"Админ {ip} дал бан постеру {p.poster}")
-            else:
-                session["message"] = "Вы не админ."
-            return redirect(post_id)
-
-        if request.form["captcha"] != captcha_for_ip[ip][0]:
-            session["message"] = "Пост не отправлен: каптча заполнена неправильно."
-            return redirect(post_id)
-        elif time.time() - captcha_for_ip[ip][1] < CAPTCHA_MIN_TIME:
-            session["message"] = "Вы слишком быстро ввели каптчу, поэтому сервер посчитал, что вы бот. " \
-                                 "Попробуйте ввести ещё раз, но медленнее."
-            return redirect(post_id)
-        elif not (request.form["topic"] or request.form["text"] or request.files["file"]):
-            session["message"] = "Пост не отправлен: ничего не заполнено."
-            return redirect(post_id)
-        elif request.form["text"] == f"/admin-{admin_password}":
-            if check_admin(ip):
-                session["message"] = "Вы уже админ."
-            else:
-                user = Users()
-                user.ip = ip
-                user.admin_level = 1
-                db_sess = db_session.create_session()
-                db_sess.add(user)
-                db_sess.commit()
-                print(f"{ip} получил админку с помощью команды")
-                session["message"] = "Админка получена успешно."
-            clear_cookies()
-            return redirect(post_id)
-        elif "/admin-" in request.form["text"]:
-            session["message"] = "Неправильный пароль."
-            return redirect(post_id)
-        post = Posts()
-        post.time = datetime.datetime.now()
-        post.poster = ip
-        post.parent_post = post_id
-        post.topic = request.form["topic"]
-        post.text = request.form["text"]
-        file = request.files["file"]
-        if file and allowed_file(file.filename):
-            filename = str(post.time).replace(" ", "-").replace(".", "-").replace(":", "-").lower() + \
-                       "." + file.filename.rsplit('.', 1)[1].lower()
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            post.media = filename
-            post.media_type = filename.rsplit('.', 1)[1].lower()
-            post.media_name = file.filename
-        post.board_name = board_name
-        db_sess = db_session.create_session()
-        db_sess.add(post)
-        db_sess.commit()
-
-        print(f"С устройства под IP {ip} было отправлено сообщение следующего содержания:")
-        print(f"ID поста: {post.id}")
-        print(f"Заголовок: {post.topic}")
-        print(f"Основной текст: {post.text}")
-        print(f"Медиа: {post.media_name}")
-        print(f"Время: {post.time}")
-        print(f"Является ответом на пост под ID {post.parent_post}")
-
-        generate_new_captcha(ip)
-        session["message"] = "Пост успешно отправлен."
-        clear_cookies()
-        return redirect(post_id)
+        return redirect(post_method(ip, request.form, request.files, board_name, post_id))
 
 
 @app.errorhandler(404)

@@ -21,5 +21,6 @@ class Posts(SqlAlchemyBase):
     board_name = sqlalchemy.Column(sqlalchemy.String, sqlalchemy.ForeignKey("boards.name"), nullable=False)
     parent_post = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
     time = sqlalchemy.Column(sqlalchemy.DateTime, nullable=False)
+    time_to_show = sqlalchemy.Column(sqlalchemy.String, nullable=False)
 
     board = orm.relation("Boards")
