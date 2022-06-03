@@ -7,6 +7,8 @@ from random import choice
 
 from threading import Timer
 
+import time
+
 import os
 
 import datetime
@@ -28,6 +30,8 @@ AUDIO_FILES = ["mp3", "wav"]
 
 PICS_404 = ["mario.gif"]
 PICS_413 = ["too_cool_and_dangerous.gif", "over9000.png"]
+
+CAPTCHA_MIN_TIME = 5
 
 ALLOWED_FILES = IMAGE_FILES + VIDEO_FILES + AUDIO_FILES
 
@@ -88,17 +92,18 @@ def allowed_file(filename):
 
 def clear_captcha_from_ip(ip):
     if ip in captcha_for_ip:
-        if os.path.isfile(f"static/media/captchas/{captcha_for_ip[ip]}.png"):
-            os.remove(f"static/media/captchas/{captcha_for_ip.pop(ip)}.png")
+        if os.path.isfile(f"static/media/captchas/{captcha_for_ip[ip][0]}.png"):
+            os.remove(f"static/media/captchas/{captcha_for_ip.pop(ip)[0]}.png")
 
 
 def generate_new_captcha(ip):
     clear_captcha_from_ip(ip)
-    captcha_for_ip[ip] = "".join([choice(
-        ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]) for _ in range(6)])
+    captcha_for_ip[ip] = ("".join([choice(
+        ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]) for _ in range(6)]),
+        time.time())
     image = ImageCaptcha(width=280, height=90)
-    image.generate(captcha_for_ip[ip])
-    image.write(captcha_for_ip[ip], f"static/media/captchas/{captcha_for_ip[ip]}.png")
+    image.generate(captcha_for_ip[ip][0])
+    image.write(captcha_for_ip[ip][0], f"static/media/captchas/{captcha_for_ip[ip][0]}.png")
     print("Сгенерирована новая каптча")
 
 
@@ -160,7 +165,7 @@ def board_url(board_name):
             return render_template("board.html", board=board_obj, posts=posts, posts_count=posts.count(),
                                    post_answers=post_answers, image_files=IMAGE_FILES, video_files=VIDEO_FILES,
                                    audio_files=AUDIO_FILES, accept_files=accept,
-                                   captcha=f"/static/media/captchas/{captcha_for_ip[ip]}.png",
+                                   captcha=f"/static/media/captchas/{captcha_for_ip[ip][0]}.png",
                                    from_admin=check_admin(ip), zone=zone,
                                    message=session["message"] if "message" in session else "",
                                    topic=session["topic"] if "topic" in session else "",
@@ -272,8 +277,12 @@ def board_url(board_name):
                 session["message"] = "Вы не админ."
             return redirect(board_name)
 
-        if request.form["captcha"] != captcha_for_ip[ip]:
+        if request.form["captcha"] != captcha_for_ip[ip][0]:
             session["message"] = "Пост не отправлен: каптча заполнена неправильно."
+            return redirect(board_name)
+        elif time.time() - captcha_for_ip[ip][1] < CAPTCHA_MIN_TIME:
+            session["message"] = "Вы слишком быстро ввели каптчу, поэтому сервер посчитал, что вы бот. " \
+                                 "Попробуйте ввести ещё раз, но медленнее."
             return redirect(board_name)
         elif not (request.form["topic"] or request.form["text"] or request.files["file"]):
             session["message"] = "Пост не отправлен: ничего не заполнено."
@@ -349,7 +358,7 @@ def post_url(board_name, post_id):
                 return render_template("post.html", board=board_obj, the_post=post_obj, posts=posts,
                                        posts_count=posts.count(), image_files=IMAGE_FILES, video_files=VIDEO_FILES,
                                        audio_files=AUDIO_FILES, accept_files=accept,
-                                       captcha=f"/static/media/captchas/{captcha_for_ip[ip]}.png",
+                                       captcha=f"/static/media/captchas/{captcha_for_ip[ip][0]}.png",
                                        from_admin=check_admin(ip), zone=zone,
                                        message=session["message"] if "message" in session else "",
                                        topic=session["topic"] if "topic" in session else "",
@@ -466,8 +475,12 @@ def post_url(board_name, post_id):
                 session["message"] = "Вы не админ."
             return redirect(post_id)
 
-        if request.form["captcha"] != captcha_for_ip[ip]:
+        if request.form["captcha"] != captcha_for_ip[ip][0]:
             session["message"] = "Пост не отправлен: каптча заполнена неправильно."
+            return redirect(post_id)
+        elif time.time() - captcha_for_ip[ip][1] < CAPTCHA_MIN_TIME:
+            session["message"] = "Вы слишком быстро ввели каптчу, поэтому сервер посчитал, что вы бот. " \
+                                 "Попробуйте ввести ещё раз, но медленнее."
             return redirect(post_id)
         elif not (request.form["topic"] or request.form["text"] or request.files["file"]):
             session["message"] = "Пост не отправлен: ничего не заполнено."
