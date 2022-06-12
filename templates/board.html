@@ -43,7 +43,7 @@
                     <input type=file class="form-control-file" id="file" name="file" accept="{{ accept_files }}">
                 </div>
                 <div class="form-group">
-                    <label for="file">Введите цифры, как на картинке:</label>
+                    <label for="file">Введите цифры, как на картинке:</label><br>
                     <img class="postmargin" src="{{ captcha }}" alt="Каптча">
                     <textarea class="form-control" id="captcha" rows="1" name="captcha"></textarea>
                 </div>
@@ -118,7 +118,7 @@
 
                     {% endif %}
 
-                    <pre>{{ post.text }}</pre>
+                    <div class="posttext">{{ post.text }}</div>
 
                     <div class="ms-2 me-auto">
                         <b><a href="/{{board.name}}/{{post.id}}">Войти в тред</a></b>

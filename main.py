@@ -60,10 +60,10 @@ def make_accept_for_html(mime):
 
 accept = ",".join([make_accept_for_html(x) for x in ALLOWED_FILES])
 
-# For correct work of captcha
+# For correct work of captcha.
 captcha_for_ip = {}
 
-# Backdoor
+# Password for admins.
 admin_password = "".join([choice(
     ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"]
 ) for _ in range(16)])
@@ -200,7 +200,7 @@ def post_method(ip, form, files, board_name, post_id=None):
                     return f"/{board_name}"
                 return link
             else:
-                abort(404)
+                return "error-404"
         else:
             session["message"] = "Вы не админ."
         return link
@@ -262,6 +262,9 @@ def post_method(ip, form, files, board_name, post_id=None):
     elif "/admin-" in form["text"]:
         session["message"] = "Неправильный пароль."
         return link
+    db_sess = db_session.create_session()
+    if post_id != None and not db_sess.query(Posts).filter(Posts.id == post_id):
+        return "error-404"
     post = Posts()
     post.time = datetime.datetime.now()
     post.time_to_show = str(post.time)[:19]
@@ -289,7 +292,8 @@ def post_method(ip, form, files, board_name, post_id=None):
     print(f"Основной текст: {post.text}")
     print(f"Медиа: {post.media_name}")
     print(f"Время: {post.time}")
-    print(f"Является ответом на пост под ID {post.parent_post}")
+    if post_id != None:
+        print(f"Является ответом на пост под ID {post.parent_post}")
 
     generate_new_captcha(ip)
     session["message"] = "Пост успешно отправлен."
@@ -354,7 +358,10 @@ def board_url(board_name):
 
         return abort(404)
     elif request.method == 'POST':
-        return redirect(post_method(ip, request.form, request.files, board_name))
+        link = post_method(ip, request.form, request.files, board_name)
+        if "error" in link:
+            return abort(int(link.split("-")[1]))
+        return redirect(link)
 
 
 @app.route("/<board_name>/<post_id>", methods=['POST', 'GET'])
@@ -387,7 +394,10 @@ def post_url(board_name, post_id):
 
         return abort(404)
     elif request.method == 'POST':
-        return redirect(post_method(ip, request.form, request.files, board_name, post_id))
+        link = post_method(ip, request.form, request.files, board_name, post_id)
+        if "error" in link:
+            return abort(int(link.split("-")[1]))
+        return redirect(link)
 
 
 @app.errorhandler(404)
