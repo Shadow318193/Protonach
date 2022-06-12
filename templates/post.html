@@ -51,7 +51,7 @@
                 Аноним, {{ the_post.time_to_show }} {{ zone }}, <b>№{{ the_post.id }}</b>
 
                 <form method="post">
-                    <button type="submit" name="like" value="{{ the_post.id }}" class="bg-success rounded">
+                    <button type="submit" name="like" value="{{ the_post.id }}" class="bg-success rounded-pill">
                         {% if ip not in the_post.raters_like %}
                         <img src="/static/media/like.png">
                         {% else %}
@@ -59,7 +59,7 @@
                         {% endif %}
                         <div class="whitetext">{{ the_post.likes }}</div>
                     </button>
-                    <button type="submit" name="dislike" value="{{ the_post.id }}" class="bg-danger rounded">
+                    <button type="submit" name="dislike" value="{{ the_post.id }}" class="bg-danger rounded-pill">
                         {% if ip not in the_post.raters_dislike %}
                         <img src="/static/media/dislike.png">
                         {% else %}
