@@ -28,6 +28,7 @@ IMAGE_FILES = ["png", "jpg", "jpeg", "gif", "jfif", "pjpeg", "pjp", "jpe", "webp
 VIDEO_FILES = ["webm", "mp4", "m4v"]
 AUDIO_FILES = ["mp3", "wav"]
 
+PICS_403 = ["gandalf.jpg"]
 PICS_404 = ["mario.gif"]
 PICS_413 = ["too_cool_and_dangerous.gif", "over9000.png"]
 
@@ -246,17 +247,28 @@ def post_method(ip, form, files, board_name, post_id=None):
         session["message"] = "Пост не отправлен: ничего не заполнено."
         return link
     elif form["text"] == f"/admin-{admin_password}":
-        if check_admin(ip):
-            session["message"] = "Вы уже админ."
-        else:
-            user = Users()
-            user.ip = ip
-            user.admin_level = 1
-            db_sess = db_session.create_session()
-            db_sess.add(user)
-            db_sess.commit()
-            print(f"{ip} получил админку с помощью команды")
-            session["message"] = "Админка получена успешно."
+        db_sess = db_session.create_session()
+        user = db_sess.query(Users).filter(Users.ip == ip)
+        for u in user:
+            if check_admin(ip):
+                session["message"] = "Вы уже админ."
+                clear_cookies()
+                return link
+            else:
+                u.admin_level = 1
+                db_sess.commit()
+                print(f"{ip} получил админку с помощью команды")
+                session["message"] = "Админка получена успешно."
+                clear_cookies()
+                return link
+        user = Users()
+        user.ip = ip
+        user.admin_level = 1
+        db_sess = db_session.create_session()
+        db_sess.add(user)
+        db_sess.commit()
+        print(f"{ip} получил админку с помощью команды")
+        session["message"] = "Админка получена успешно."
         clear_cookies()
         return link
     elif "/admin-" in form["text"]:
@@ -325,6 +337,86 @@ def robots():
         session.pop("message")
     clear_captcha_from_ip(ip)
     return f"{open('robots.txt', 'r').read()}"
+
+
+@app.route("/admin", methods=['POST', 'GET'])
+def admin_menu():
+    ip = get_ip()
+    clear_captcha_from_ip(ip)
+
+    if request.method == "GET":
+        if check_admin(ip) and not check_ban(ip):
+            db_sess = db_session.create_session()
+            admins = db_sess.query(Users).filter(Users.admin_level > 0, Users.ip != ip)
+            users = db_sess.query(Users).filter(Users.admin_level == 0)
+            return render_template("admin.html", admins=admins, admins_count=admins.count(),
+                                   users=users, users_count=users.count(), you=check_admin(ip),
+                                   message=session["message"] if "message" in session else "")
+        else:
+            return abort(403)
+
+    elif request.method == "POST":
+        if check_admin(ip) and not check_ban(ip):
+            if "ban" in request.form:
+                db_sess = db_session.create_session()
+                user = db_sess.query(Users).filter(Users.ip == request.form["ban"])
+                for u in user:
+                    if not u.is_banned:
+                        if check_admin(request.form["ban"]) < check_admin(ip):
+                            u.is_banned = 1
+                            db_sess.commit()
+                            session["message"] = "Вы забанили пользователя."
+                            print(f"Админ {ip} дал бан пользователю {request.form['ban']}")
+                            return redirect("/admin")
+                        else:
+                            session["message"] = "Вы пытались забанить админа, равного или " \
+                                                 "высшего по уровню. Так нельзя."
+                            return redirect("/admin")
+                    else:
+                        session["message"] = "Пользователь уже забанен."
+                        return redirect("/admin")
+                session["message"] = "Пользователя нет в списке. Вы играетесь с HTML страницы? :)"
+            elif "unban" in request.form:
+                db_sess = db_session.create_session()
+                user = db_sess.query(Users).filter(Users.ip == request.form["unban"])
+                for u in user:
+                    if u.is_banned:
+                        if check_admin(request.form["unban"]) < check_admin(ip):
+                            u.is_banned = 0
+                            db_sess.commit()
+                            session["message"] = "Вы разбанили пользователя."
+                            print(f"Админ {ip} разбанил пользователя {request.form['unban']}")
+                            return redirect("/admin")
+                        else:
+                            session["message"] = "Вы пытались разбанить админа, равного или " \
+                                                 "высшего по уровню. Так нельзя."
+                            return redirect("/admin")
+                    else:
+                        session["message"] = "Пользователь уже разбанен."
+                        return redirect("/admin")
+                session["message"] = "Пользователя нет в списке. Вы играетесь с HTML страницы? :)"
+            elif "remove_admin" in request.form:
+                db_sess = db_session.create_session()
+                user = db_sess.query(Users).filter(Users.ip == request.form["remove_admin"])
+                for u in user:
+                    if u.admin_level:
+                        if check_admin(request.form["remove_admin"]) < check_admin(ip):
+                            u.admin_level = 0
+                            db_sess.commit()
+                            session["message"] = "Вы отобрали админку у пользователя."
+                            print(f"Админ {ip} отобрал админку у {request.form['remove_admin']}")
+                            return redirect("/admin")
+                        else:
+                            session["message"] = "Вы пытались уволить админа, равного или " \
+                                                 "высшего по уровню. Так нельзя."
+                            return redirect("/admin")
+                    else:
+                        session["message"] = "Пользователь уже уволен."
+                        return redirect("/admin")
+                session["message"] = "Пользователя нет в списке. Вы играетесь с HTML страницы? :)"
+        else:
+            return redirect("/admin")
+
 
 
 @app.route("/<board_name>", methods=['POST', 'GET'])
@@ -398,6 +490,16 @@ def post_url(board_name, post_id):
         if "error" in link:
             return abort(int(link.split("-")[1]))
         return redirect(link)
+
+
+@app.errorhandler(403)
+def error404(e):
+    ip = get_ip()
+    clear_captcha_from_ip(ip)
+    print(e)
+    return render_template("error.html", code=403,
+                           text="НЕ админам сюда не пройти. Так Гендальф сказал.",
+                           pics=PICS_403)
 
 
 @app.errorhandler(404)

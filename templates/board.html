@@ -51,7 +51,9 @@
                 <button type="submit" class="btn btn-orange">Отправить</button>
             </form>
 
+    {% if message %}
     <h2 class="messagetext"><i>{{ message }}</i></h2>
+    {% endif %}
 
     <div class="boardspadding">
 
@@ -122,13 +124,13 @@
 
                     <div class="ms-2 me-auto">
                         <b><a href="/{{board.name}}/{{post.id}}">Войти в тред</a></b>
-                        <span class="badge bg-orange rounded-pill">
+                        <span class="badge bg-orange rounded-pill whitetext">
                             {% if post_answers[post.id] % 10 == 0 or post_answers[post.id] % 10 >= 5 or (11 <= post_answers[post.id] % 100 <= 19) %}
-                            <div class="whitetext">{{ post_answers[post.id] }} ответов</div>
+                            {{ post_answers[post.id] }} ответов
                             {% elif post_answers[post.id] % 10 == 1 %}
-                            <div class="whitetext">{{ post_answers[post.id] }} ответ</div>
+                            {{ post_answers[post.id] }} ответ
                             {% else %}
-                            <div class="whitetext">{{ post_answers[post.id] }} ответа</div>
+                            {{ post_answers[post.id] }} ответа
                             {% endif %}
                         </span>
                     </div>

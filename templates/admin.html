@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="yandex-verification" content="92be3d4ec61f5404">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="/static/media/favicon.png"/>
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+          crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/static/css/stylesheet.css">
+
+    <title>Протонач</title>
+    <meta name="description" content="Анонимная имиджборда"/>
+</head>
+
+<body>
+    <header>
+
+        <div class="alert alert-info" role="alert">
+            <a href="/">
+                <h2>Протонач</h2>
+            </a>
+            <h1 class="aligncenter">Меню админов</h1>
+        </div>
+
+    </header>
+
+    {% if message %}
+    <h2 class="messagetext"><i>{{ message }}</i></h2>
+    {% endif %}
+
+    <p class="aligncenter">
+        <b>Обособленные IP, кроме вашего, показываются здесь.</b>
+    </p>
+
+    <p class="aligncenter">
+        Зачёркнутые IP — забаненные.
+    </p>
+
+    <p class="aligncenter">
+        Выделенные красным IP = админы, старшие или равные по званию, их статус менять невозможно.
+    </p>
+
+    {% if admins_count %}
+
+        <div class="boardslist">
+
+            <h1 class="colortext">
+                Админы:
+            </h1>
+
+            <ol class="list-group">
+                {% for admin in admins %}
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <div class="ms-2 me-auto">
+                        {% if admin.is_banned and admin.admin_level >= you %}
+                        <h1><s style="color: #ff0000">{{ admin.ip }}</s></h1>
+                        {% elif admin.admin_level >= you %}
+                        <h1 style="color: #ff0000">{{ admin.ip }}</h1>
+                        {% elif admin.is_banned %}
+                        <h1><s>{{ admin.ip }}</s></h1>
+                        {% else %}
+                        <h1>{{ admin.ip }}</h1>
+                        {% endif %}
+                        {% if admin.admin_level < you %}
+                        <form method="post">
+                            <div class="ms-2 me-auto">
+                                <button type="submit" name="remove_admin" value="{{ admin.ip }}">Убрать админку</button>
+                                {% if admin.is_banned %}
+                                <button type="submit" name="unban" value="{{ admin.ip }}">Разбанить пользователя</button>
+                                {% else %}
+                                <button type="submit" name="ban" value="{{ admin.ip }}">Забанить пользователя</button>
+                                {% endif %}
+                            </div>
+                        </form>
+                        {% else %}
+                        <b>Действия с этим админом для вас запрещены.</b>
+                        {% endif %}
+                    </div>
+                    <span class="badge bg-orange rounded-pill whitetext">{{ admin.admin_level }} уровень админки</span>
+                </li>
+                {% endfor %}
+            </ol>
+
+        </div>
+
+    {% endif %}
+
+    {% if users_count %}
+
+        <div class="boardslist">
+
+            <h1 class="colortext">
+                Обычные пользователи:
+            </h1>
+
+            <ol class="list-group">
+                {% for user in users %}
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <div class="ms-2 me-auto">
+                        {% if user.is_banned %}
+                        <h1><s>{{ user.ip }}</s></h1>
+                        {% else %}
+                        <h1>{{ user.ip }}</h1>
+                        {% endif %}
+                        <form method="post">
+                            <div class="ms-2 me-auto">
+                                {% if user.is_banned %}
+                                <button type="submit" name="unban" value="{{ user.ip }}">Разбанить пользователя</button>
+                                {% else %}
+                                <button type="submit" name="ban" value="{{ user.ip }}">Забанить пользователя</button>
+                                {% endif %}
+                            </div>
+                        </form>
+                    </div>
+                </li>
+                {% endfor %}
+            </ol>
+
+        </div>
+
+    {% endif %}
+</body>
+</html>

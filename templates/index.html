@@ -68,13 +68,13 @@
                     <a href="/{{ board.name }}">
                         <button type="button" class="list-group-item list-group-item-action">
                             <b>/{{ board.name }}/</b> — {{ board.full_name }}
-                            <span class="badge bg-orange rounded-pill">
+                            <span class="badge bg-orange rounded-pill whitetext">
                                 {% if posts[board.name] % 10 == 0 or posts[board.name] % 10 >= 5 or (11 <= posts[board.name] % 100 <= 19) %}
-                                <div class="whitetext">{{ posts[board.name] }} постов</div>
+                                {{ posts[board.name] }} постов
                                 {% elif posts[board.name] % 10 == 1 %}
-                                <div class="whitetext">{{ posts[board.name] }} пост</div>
+                                {{ posts[board.name] }} пост
                                 {% else %}
-                                <div class="whitetext">{{ posts[board.name] }} поста</div>
+                                {{ posts[board.name] }} поста
                                 {% endif %}
                             </span>
                         </button>

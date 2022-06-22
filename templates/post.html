@@ -30,7 +30,9 @@
 
     <h1 class="aligncenter">Тред-пост №{{ the_post.id }}</h1>
 
+    {% if message %}
     <h2 class="messagetext"><i>{{ message }}</i></h2>
+    {% endif %}
 
     <div class="boardspadding">
 
