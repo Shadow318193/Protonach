@@ -125,17 +125,15 @@
 
                     {% endif %}
 
-                    <div class="posttext">{{ post.text }}</div>
+                    <div class="posttext">{{ post.text }}</div><br>
 
-                    <div class="ms-2 me-auto">
-                        {% if post_answers[post.id] % 10 == 0 or post_answers[post.id] % 10 >= 5 or (11 <= post_answers[post.id] % 100 <= 19) %}
-                            <a href="/{{board.name}}/{{post.id}}"><button type="button" class="btn btn-orange">Войти в тред ({{ post_answers[post.id] }} ответов)</button></a>
-                        {% elif post_answers[post.id] % 10 == 1 %}
-                            <a href="/{{board.name}}/{{post.id}}"><button type="button" class="btn btn-orange">Войти в тред ({{ post_answers[post.id] }} ответ)</button></a>
-                        {% else %}
-                            <a href="/{{board.name}}/{{post.id}}"><button type="button" class="btn btn-orange">Войти в тред ({{ post_answers[post.id] }} ответа)</button></a>
-                        {% endif %}
-                    </div>
+                    {% if post_answers[post.id] % 10 == 0 or post_answers[post.id] % 10 >= 5 or (11 <= post_answers[post.id] % 100 <= 19) %}
+                    <a href="/{{board.name}}/{{post.id}}"><button type="button" class="btn btn-orange">Войти в тред ({{ post_answers[post.id] }} ответов)</button></a>
+                    {% elif post_answers[post.id] % 10 == 1 %}
+                    <a href="/{{board.name}}/{{post.id}}"><button type="button" class="btn btn-orange">Войти в тред ({{ post_answers[post.id] }} ответ)</button></a>
+                    {% else %}
+                    <a href="/{{board.name}}/{{post.id}}"><button type="button" class="btn btn-orange">Войти в тред ({{ post_answers[post.id] }} ответа)</button></a>
+                    {% endif %}
 
                 </div>
 
