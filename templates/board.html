@@ -18,7 +18,7 @@
 <body>
     <header>
 
-        <div class="alert alert-info" role="alert">
+        <div class="alertwithoutround alert-info" role="alert">
             <a href="/">
                 <h2>Протонач</h2>
             </a>
@@ -39,7 +39,7 @@
                     <textarea class="form-control" id="text" rows="3" name="text">{{ text }}</textarea>
                 </div>
                 <div class="form-group">
-                    <label for="file">Приложите медиафайл</label>
+                    <label for="file">Приложите медиафайл (Максимум мегабайт — {{ max_size }})</label>
                     <input type=file class="form-control-file" id="file" name="file" accept="{{ accept_files }}">
                 </div>
                 <div class="form-group">
@@ -67,12 +67,17 @@
 
             <div class="postmargin">
 
+                {% if post.poster == ip %}
+                <div class="alert alert-warning" role="alert">
+                {% else %}
                 <div class="alert alert-info" role="alert">
+                    {% endif %}
+
                     {% if from_admin %}
                         <form method="post">
                             <div class="ms-2 me-auto">
-                                <button type="submit" name="delete_post" value="{{ post.id }}">Удалить пост</button>
-                                <button type="submit" name="ban" value="{{ post.id }}">Забанить постера</button>
+                                <button type="submit" class="btn btn-orange" name="delete_post" value="{{ post.id }}">Удалить пост</button>
+                                <button type="submit" class="btn btn-orange" name="ban" value="{{ post.id }}">Забанить постера</button>
                             </div>
                         </form>
                     {% endif %}
@@ -108,11 +113,11 @@
 
                         {% if post.media_type in image_files %}
                             <a href="/static/media/from_users/{{ post.media }}">
-                                <img src="/static/media/from_users/{{ post.media }}" height="192"
+                                <img src="/static/media/from_users/{{ post.media }}" class="media" height="192"
                                      alt="{{ post.media_name }}">
                             </a><br>
                         {% elif post.media_type in video_files %}
-                            <video controls src="/static/media/from_users/{{ post.media }}" height="192"></video>
+                            <video controls src="/static/media/from_users/{{ post.media }}" class="media" height="192"></video>
                         {% elif post.media_type in audio_files %}
                             <audio controls src="/static/media/from_users/{{ post.media }}"></audio>
                         {% endif %}
@@ -123,16 +128,13 @@
                     <div class="posttext">{{ post.text }}</div>
 
                     <div class="ms-2 me-auto">
-                        <b><a href="/{{board.name}}/{{post.id}}">Войти в тред</a></b>
-                        <span class="badge bg-orange rounded-pill whitetext">
-                            {% if post_answers[post.id] % 10 == 0 or post_answers[post.id] % 10 >= 5 or (11 <= post_answers[post.id] % 100 <= 19) %}
-                            {{ post_answers[post.id] }} ответов
-                            {% elif post_answers[post.id] % 10 == 1 %}
-                            {{ post_answers[post.id] }} ответ
-                            {% else %}
-                            {{ post_answers[post.id] }} ответа
-                            {% endif %}
-                        </span>
+                        {% if post_answers[post.id] % 10 == 0 or post_answers[post.id] % 10 >= 5 or (11 <= post_answers[post.id] % 100 <= 19) %}
+                            <a href="/{{board.name}}/{{post.id}}"><button type="button" class="btn btn-orange">Войти в тред ({{ post_answers[post.id] }} ответов)</button></a>
+                        {% elif post_answers[post.id] % 10 == 1 %}
+                            <a href="/{{board.name}}/{{post.id}}"><button type="button" class="btn btn-orange">Войти в тред ({{ post_answers[post.id] }} ответ)</button></a>
+                        {% else %}
+                            <a href="/{{board.name}}/{{post.id}}"><button type="button" class="btn btn-orange">Войти в тред ({{ post_answers[post.id] }} ответа)</button></a>
+                        {% endif %}
                     </div>
 
                 </div>

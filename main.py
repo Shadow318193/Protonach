@@ -22,7 +22,7 @@ from data.users import Users
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret_key'
 app.config['UPLOAD_FOLDER'] = 'static/media/from_users'
-app.config['MAX_CONTENT_LENGTH'] = 64 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024
 
 IMAGE_FILES = ["png", "jpg", "jpeg", "gif", "jfif", "pjpeg", "pjp", "jpe", "webp"]
 VIDEO_FILES = ["webm", "mp4", "m4v"]
@@ -105,7 +105,7 @@ def generate_new_captcha(ip):
     image = ImageCaptcha(width=280, height=90)
     image.generate(captcha_for_ip[ip][0])
     image.write(captcha_for_ip[ip][0], f"static/media/captchas/{captcha_for_ip[ip][0]}.png")
-    print("Сгенерирована новая каптча")
+    print("Сгенерирована новая капча")
 
 
 def get_ip():
@@ -136,7 +136,7 @@ def post_method(ip, form, files, board_name, post_id=None):
         session[elem] = form[elem]
 
     if ip not in captcha_for_ip:
-        session["message"] = "Извините, но произошли неполадки с каптчей. Попробуйте отправить ваше сообщение " \
+        session["message"] = "Извините, но произошли неполадки с капчей. Попробуйте отправить ваше сообщение " \
                              "ещё раз."
         return link
 
@@ -237,10 +237,10 @@ def post_method(ip, form, files, board_name, post_id=None):
         return link
 
     if form["captcha"] != captcha_for_ip[ip][0]:
-        session["message"] = "Пост не отправлен: каптча заполнена неправильно."
+        session["message"] = "Пост не отправлен: капча заполнена неправильно."
         return link
     elif time.time() - captcha_for_ip[ip][1] < CAPTCHA_MIN_TIME:
-        session["message"] = "Вы слишком быстро ввели каптчу, поэтому сервер посчитал, что вы бот. " \
+        session["message"] = "Вы слишком быстро ввели капчу, поэтому сервер посчитал, что вы бот. " \
                              "Попробуйте ввести ещё раз, но медленнее."
         return link
     elif not (form["topic"] or form["text"] or files["file"]):
@@ -445,7 +445,8 @@ def board_url(board_name):
                                    from_admin=check_admin(ip), zone=zone,
                                    message=session["message"] if "message" in session else "",
                                    topic=session["topic"] if "topic" in session else "",
-                                   text=session["text"] if "text" in session else "", ip=ip
+                                   text=session["text"] if "text" in session else "", ip=ip,
+                                   max_size=app.config['MAX_CONTENT_LENGTH'] // (1024 * 1024)
                                    )
 
         return abort(404)
@@ -482,7 +483,8 @@ def post_url(board_name, post_id):
                                        from_admin=check_admin(ip), zone=zone,
                                        message=session["message"] if "message" in session else "",
                                        topic=session["topic"] if "topic" in session else "",
-                                       text=session["text"] if "text" in session else "", ip=ip)
+                                       text=session["text"] if "text" in session else "", ip=ip,
+                                       max_size=app.config['MAX_CONTENT_LENGTH'] // (1024 * 1024))
 
         return abort(404)
     elif request.method == 'POST':
