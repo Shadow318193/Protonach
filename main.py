@@ -35,6 +35,7 @@ PICS_413 = ["too_cool_and_dangerous.gif", "over9000.png"]
 CAPTCHA_MIN_TIME = 5
 
 ALLOWED_FILES = IMAGE_FILES + VIDEO_FILES + AUDIO_FILES
+MAX_MEDIA_COUNT = 4
 
 PYTHONANYWHERE = False  # http://shadow318193.pythonanywhere.com
 
@@ -249,7 +250,7 @@ def post_method(ip, form, files, board_name, post_id=None):
     elif not (form["topic"] or form["text"] or files["file[]"]):
         session["message"] = "Пост не отправлен: ничего не заполнено."
         return link
-    elif len(files_list) > 4:
+    elif len(files_list) > MAX_MEDIA_COUNT:
         session["message"] = "Пост не отправлен: нельзя отправить более 4 файлов."
         return link
     elif form["text"] == f"/admin-{admin_password}":
@@ -477,8 +478,8 @@ def board_url(board_name):
                                    message=session["message"] if "message" in session else "",
                                    topic=session["topic"] if "topic" in session else "",
                                    text=session["text"] if "text" in session else "", ip=ip,
-                                   max_size=app.config['MAX_CONTENT_LENGTH'] // (1024 * 1024)
-                                   )
+                                   max_size=app.config['MAX_CONTENT_LENGTH'] // (1024 * 1024),
+                                   max_count=MAX_MEDIA_COUNT)
 
         return abort(404)
     elif request.method == 'POST':
@@ -542,7 +543,8 @@ def post_url(board_name, post_id):
                                        message=session["message"] if "message" in session else "",
                                        topic=session["topic"] if "topic" in session else "",
                                        text=session["text"] if "text" in session else "", ip=ip,
-                                       max_size=app.config['MAX_CONTENT_LENGTH'] // (1024 * 1024))
+                                       max_size=app.config['MAX_CONTENT_LENGTH'] // (1024 * 1024),
+                                       max_count=MAX_MEDIA_COUNT)
 
         return abort(404)
     elif request.method == 'POST':
