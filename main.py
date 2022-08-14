@@ -190,7 +190,7 @@ def post_method(ip, form, files, board_name, post_id=None):
                         parent_post = True
                     for currentdir, dirs, files in os.walk("static/media/from_users"):
                         for f in files:
-                            if f == p.media and os.path.isfile(f"static/media/from_users/{f}"):
+                            if f in p.media.split(", ") and os.path.isfile(f"static/media/from_users/{f}"):
                                 print(f)
                                 os.remove(f"static/media/from_users/{f}")
                     db_sess.delete(p)
@@ -236,6 +236,9 @@ def post_method(ip, form, files, board_name, post_id=None):
             session["message"] = "Вы не админ."
         return link
 
+    files_list = files.getlist("file[]")
+    print(files_list, "!!!", len(files_list))
+
     if form["captcha"] != captcha_for_ip[ip][0]:
         session["message"] = "Пост не отправлен: капча заполнена неправильно."
         return link
@@ -243,8 +246,11 @@ def post_method(ip, form, files, board_name, post_id=None):
         session["message"] = "Вы слишком быстро ввели капчу, поэтому сервер посчитал, что вы бот. " \
                              "Попробуйте ввести ещё раз, но медленнее."
         return link
-    elif not (form["topic"] or form["text"] or files["file"]):
+    elif not (form["topic"] or form["text"] or files["file[]"]):
         session["message"] = "Пост не отправлен: ничего не заполнено."
+        return link
+    elif len(files_list) > 4:
+        session["message"] = "Пост не отправлен: нельзя отправить более 4 файлов."
         return link
     elif form["text"] == f"/admin-{admin_password}":
         db_sess = db_session.create_session()
@@ -285,14 +291,27 @@ def post_method(ip, form, files, board_name, post_id=None):
         post.parent_post = post_id
     post.topic = form["topic"]
     post.text = form["text"]
-    file = files["file"]
-    if file and allowed_file(file.filename):
-        filename = str(post.time).replace(" ", "-").replace(".", "-").replace(":", "-").lower() + \
-                   "." + file.filename.rsplit('.', 1)[1].lower()
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        post.media = filename
-        post.media_type = filename.rsplit('.', 1)[1].lower()
-        post.media_name = file.filename
+
+    f_count = 0
+    media = []
+    media_type = []
+    media_name = []
+    for file in files_list:
+        print(file)
+        if allowed_file(file.filename):
+            filename = str(post.time).replace(" ", "-").replace(".", "-").replace(":", "-").lower() + \
+                       "_" + str(f_count) + "." + file.filename.rsplit('.', 1)[1].lower()
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            media.append(filename)
+            media_type.append(filename.rsplit('.', 1)[1].lower())
+            media_name.append(file.filename)
+            f_count += 1
+    if media:
+        post.media = ", ".join(media)
+    if media_type:
+        post.media_type = ", ".join(media_type)
+    if media_name:
+        post.media_name = ", ".join(media_name)
     post.board_name = board_name
     db_sess = db_session.create_session()
     db_sess.add(post)
@@ -435,11 +454,23 @@ def board_url(board_name):
             posts = db_sess.query(Posts).filter(Posts.board_name == board_obj.name,
                                                 Posts.parent_post == None)
             post_answers = {}
+            post_media = {}
+            post_media_type = {}
+            post_media_name = {}
+            post_media_count = {}
             for post in posts:
                 post_answers[post.id] = db_sess.query(Posts).filter(Posts.parent_post == post.id).count()
+                if post.media:
+                    post_media[post.id] = post.media.split(", ")
+                    post_media_type[post.id] = post.media_type.split(", ")
+                    post_media_name[post.id] = post.media_name.split(", ")
+                    post_media_count[post.id] = len(post.media.split(", "))
 
             return render_template("board.html", board=board_obj, posts=posts, posts_count=posts.count(),
-                                   post_answers=post_answers, image_files=IMAGE_FILES, video_files=VIDEO_FILES,
+                                   post_answers=post_answers, post_media=post_media,
+                                   post_media_type=post_media_type, post_media_name=post_media_name,
+                                   post_media_count=post_media_count,
+                                   image_files=IMAGE_FILES, video_files=VIDEO_FILES,
                                    audio_files=AUDIO_FILES, accept_files=accept,
                                    captcha=f"/static/media/captchas/{captcha_for_ip[ip][0]}.png",
                                    from_admin=check_admin(ip), zone=zone,
@@ -476,7 +507,34 @@ def post_url(board_name, post_id):
             for post_obj in post_select:
                 posts = db_sess.query(Posts).filter(Posts.parent_post == post_id)
 
-                return render_template("post.html", board=board_obj, the_post=post_obj, posts=posts,
+                if post_obj.media:
+                    the_post_media = post_obj.media.split(", ")
+                    the_post_media_type = post_obj.media_type.split(", ")
+                    the_post_media_name = post_obj.media_name.split(", ")
+                    the_post_media_count = len(post_obj.media.split(", "))
+                else:
+                    the_post_media = None
+                    the_post_media_type = None
+                    the_post_media_name = None
+                    the_post_media_count = None
+
+                post_media = {}
+                post_media_type = {}
+                post_media_name = {}
+                post_media_count = {}
+                for post in posts:
+                    if post.media:
+                        post_media[post.id] = post.media.split(", ")
+                        post_media_type[post.id] = post.media_type.split(", ")
+                        post_media_name[post.id] = post.media_name.split(", ")
+                        post_media_count[post.id] = len(post.media.split(", "))
+
+                return render_template("post.html", board=board_obj, the_post=post_obj, the_post_media=the_post_media,
+                                       the_post_media_type=the_post_media_type,
+                                       the_post_media_name=the_post_media_name,
+                                       the_post_media_count=the_post_media_count, posts=posts,
+                                       post_media=post_media, post_media_type=post_media_type,
+                                       post_media_name=post_media_name, post_media_count=post_media_count,
                                        posts_count=posts.count(), image_files=IMAGE_FILES, video_files=VIDEO_FILES,
                                        audio_files=AUDIO_FILES, accept_files=accept,
                                        captcha=f"/static/media/captchas/{captcha_for_ip[ip][0]}.png",

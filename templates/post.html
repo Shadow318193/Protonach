@@ -79,22 +79,23 @@
                     <h2 class="posttext">{{ the_post.topic }}</h2>
                 {% endif %}
 
-                {% if the_post.media %}
+                {% if the_post_media %}
+                    {% for i in range(the_post_media_count) %}
 
-                    [<i>{{ the_post.media_name }}</i>]<br>
+                    [<i>{{ the_post_media_name[i] }}</i>]<br>
 
-                    {% if the_post.media_type in image_files %}
-                        <a href="/static/media/from_users/{{ the_post.media }}">
-                            <img src="/static/media/from_users/{{ the_post.media }}" class="media" height="192"
-                                alt="{{ the_post.media_name }}">
+                    {% if the_post_media_type[i] in image_files %}
+                        <a href="/static/media/from_users/{{ the_post_media[i] }}">
+                            <img src="/static/media/from_users/{{ the_post_media[i] }}" class="media" height="192"
+                                alt="{{ the_post_media_name[i] }}">
                         </a><br>
-                    {% elif the_post.media_type in video_files %}
-                        <video controls src="/static/media/from_users/{{ the_post.media }}" class="media" height="192"></video>
-                    {% elif the_post.media_type in audio_files %}
-                        <audio controls src="/static/media/from_users/{{ the_post.media }}"></audio>
+                    {% elif the_post_media_type[i] in video_files %}
+                        <video controls src="/static/media/from_users/{{ the_post_media[i] }}" class="media" height="192"></video>
+                    {% elif the_post_media_type[i] in audio_files %}
+                        <audio controls src="/static/media/from_users/{{ the_post_media[i] }}"></audio>
                     {% endif %}
                     <br>
-
+                    {% endfor %}
                 {% endif %}
 
                 <div class="posttext">{{ the_post.text }}</div>
@@ -153,22 +154,23 @@
                                 <h2 class="posttext">{{ post.topic }}</h2>
                             {% endif %}
 
-                            {% if post.media %}
+                            {% if post_media[post.id] %}
+                            {% for i in range(post_media_count[post.id]) %}
 
-                            [<i>{{ post.media_name }}</i>]<br>
+                            [<i>{{ post_media_name[post.id][i] }}</i>]<br>
 
-                            {% if post.media_type in image_files %}
-                                <a href="/static/media/from_users/{{ post.media }}">
-                                    <img src="/static/media/from_users/{{ post.media }}" class="media" height="192"
-                                        alt="{{ post.media_name }}">
+                            {% if post_media_type[post.id][i] in image_files %}
+                                <a href="/static/media/from_users/{{ post_media[post.id][i] }}">
+                                    <img src="/static/media/from_users/{{ post_media[post.id][i] }}" class="media" height="192"
+                                        alt="{{ post_media_name[post.id][i] }}">
                                 </a><br>
-                            {% elif post.media_type in video_files %}
-                                <video controls src="/static/media/from_users/{{ post.media }}" class="media" height="192"></video>
-                            {% elif post.media_type in audio_files %}
-                                <audio controls src="/static/media/from_users/{{ post.media }}"></audio>
+                            {% elif post_media_type[post.id][i] in video_files %}
+                                <video controls src="/static/media/from_users/{{ post_media[post.id][i] }}" class="media" height="192"></video>
+                            {% elif post_media_type[post.id][i] in audio_files %}
+                                <audio controls src="/static/media/from_users/{{ post_media[post.id][i] }}"></audio>
                             {% endif %}
                             <br>
-
+                            {% endfor %}
                             {% endif %}
 
                             <div class="posttext">{{ post.text }}</div>
@@ -202,8 +204,8 @@
                     <textarea class="form-control" id="text" rows="3" name="text">{{ text }}</textarea>
                 </div>
                 <div class="form-group">
-                    <label for="file">Приложите медиафайл (Максимум мегабайт — {{ max_size }})</label>
-                    <input type=file class="form-control-file" id="file" name="file" accept="{{ accept_files }}">
+                    <label for="file">Приложите медиафайлы (Максимум мегабайт — {{ max_size }})</label>
+                    <input type=file class="form-control-file" id="file[]" name="file[]" multiple="multiple" accept="{{ accept_files }}">
                 </div>
                 <div class="form-group">
                     <label for="file">Введите цифры, как на картинке:</label><br>
