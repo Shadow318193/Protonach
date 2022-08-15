@@ -349,7 +349,7 @@ def index():
     for board in boards:
         posts[board.name] = db_sess.query(Posts).filter(Posts.board_name == board.name).count()
     return render_template("index.html", boards=boards, boards_count=boards.count(), posts=posts,
-                           from_admin=check_admin(ip))
+                           from_admin=check_admin(ip), is_banned=check_ban(ip))
 
 
 @app.route("/robots.txt")
@@ -476,7 +476,7 @@ def board_url(board_name):
                                    image_files=IMAGE_FILES, video_files=VIDEO_FILES,
                                    audio_files=AUDIO_FILES, accept_files=accept,
                                    captcha=f"/static/media/captchas/{captcha_for_ip[ip][0]}.png",
-                                   from_admin=check_admin(ip), zone=zone,
+                                   from_admin=check_admin(ip), is_banned=check_ban(ip), zone=zone,
                                    message=session["message"] if "message" in session else "",
                                    topic=session["topic"] if "topic" in session else "",
                                    text=session["text"] if "text" in session else "", ip=ip,
@@ -541,7 +541,7 @@ def post_url(board_name, post_id):
                                        posts_count=posts.count(), image_files=IMAGE_FILES, video_files=VIDEO_FILES,
                                        audio_files=AUDIO_FILES, accept_files=accept,
                                        captcha=f"/static/media/captchas/{captcha_for_ip[ip][0]}.png",
-                                       from_admin=check_admin(ip), zone=zone,
+                                       from_admin=check_admin(ip), is_banned=check_ban(ip), zone=zone,
                                        message=session["message"] if "message" in session else "",
                                        topic=session["topic"] if "topic" in session else "",
                                        text=session["text"] if "text" in session else "", ip=ip,
@@ -561,7 +561,7 @@ def error404(e):
     ip = get_ip()
     clear_captcha_from_ip(ip)
     print(e)
-    return render_template("error.html", code=403, from_admin=check_admin(ip),
+    return render_template("error.html", code=403, from_admin=check_admin(ip), is_banned=check_ban(ip),
                            text="НЕ админам сюда не пройти. Так Гендальф сказал.",
                            pics=PICS_403)
 
@@ -571,7 +571,7 @@ def error404(e):
     ip = get_ip()
     clear_captcha_from_ip(ip)
     print(e)
-    return render_template("error.html", code=404, from_admin=check_admin(ip),
+    return render_template("error.html", code=404, from_admin=check_admin(ip), is_banned=check_ban(ip),
                            text="К сожалению, данный материал больше недоступен или его не существует.",
                            pics=PICS_404)
 
@@ -581,7 +581,7 @@ def error413(e):
     ip = get_ip()
     clear_captcha_from_ip(ip)
     print(e)
-    return render_template("error.html", code=413, from_admin=check_admin(ip),
+    return render_template("error.html", code=413, from_admin=check_admin(ip), is_banned=check_ban(ip),
                            text="Извините, но прикреплённый файл оказался по размерам слишком крут "
                                 "и опасен для сервера, поэтому сервер подписал отказ в отправке.",
                            pics=PICS_413)
@@ -592,7 +592,7 @@ def error500(e):
     ip = get_ip()
     clear_captcha_from_ip(ip)
     print(e)
-    return render_template("error.html", code=500, from_admin=check_admin(ip),
+    return render_template("error.html", code=500, from_admin=check_admin(ip), is_banned=check_ban(ip),
                            text="По причинческим технинам сервер подписал отказ. "
                                 "Извините за доставленные неудобства.",
                            pics=["prichincheskaya_tehnina.png"])

@@ -56,7 +56,7 @@
         <img src="/static/media/anon.png">
     </p>
 
-    {% if from_admin %}
+    {% if from_admin and not is_banned %}
     <div class="aligncenter"><a href="/admin"><button type="button" class="btn btn-orange"><h2>Меню админа</h2></button></a></div>
     <br>
     {% endif %}

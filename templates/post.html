@@ -24,7 +24,7 @@
             </a>
             <h1 class="aligncenter">/{{ board.name }}/ — {{ board.full_name }}</h1>
             <h3 class="aligncenter">{{ board.about }}</h3>
-            {% if from_admin %}
+            {% if from_admin and not is_banned %}
                 <div class="aligncenter"><a href="/admin"><button type="button" class="btn btn-orange"><h2>Меню админа</h2></button></a></div>
                 <br>
             {% endif %}
