@@ -56,6 +56,11 @@
         <img src="/static/media/anon.png">
     </p>
 
+    {% if from_admin %}
+    <div class="aligncenter"><a href="/admin"><button type="button" class="btn btn-orange"><h2>Меню админа</h2></button></a></div>
+    <br>
+    {% endif %}
+
     {% if boards_count %}
 
         <div class="boardslist">

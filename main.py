@@ -191,9 +191,10 @@ def post_method(ip, form, files, board_name, post_id=None):
                         parent_post = True
                     for currentdir, dirs, files in os.walk("static/media/from_users"):
                         for f in files:
-                            if f in p.media.split(", ") and os.path.isfile(f"static/media/from_users/{f}"):
-                                print(f)
-                                os.remove(f"static/media/from_users/{f}")
+                            if p.media != None:
+                                if f in p.media.split(", ") and os.path.isfile(f"static/media/from_users/{f}"):
+                                    print(f)
+                                    os.remove(f"static/media/from_users/{f}")
                     db_sess.delete(p)
                 db_sess.commit()
                 session["message"] = "Вы удалили пост."
@@ -347,7 +348,8 @@ def index():
     posts = {}
     for board in boards:
         posts[board.name] = db_sess.query(Posts).filter(Posts.board_name == board.name).count()
-    return render_template("index.html", boards=boards, boards_count=boards.count(), posts=posts)
+    return render_template("index.html", boards=boards, boards_count=boards.count(), posts=posts,
+                           from_admin=check_admin(ip))
 
 
 @app.route("/robots.txt")
@@ -559,7 +561,7 @@ def error404(e):
     ip = get_ip()
     clear_captcha_from_ip(ip)
     print(e)
-    return render_template("error.html", code=403,
+    return render_template("error.html", code=403, from_admin=check_admin(ip),
                            text="НЕ админам сюда не пройти. Так Гендальф сказал.",
                            pics=PICS_403)
 
@@ -569,7 +571,7 @@ def error404(e):
     ip = get_ip()
     clear_captcha_from_ip(ip)
     print(e)
-    return render_template("error.html", code=404,
+    return render_template("error.html", code=404, from_admin=check_admin(ip),
                            text="К сожалению, данный материал больше недоступен или его не существует.",
                            pics=PICS_404)
 
@@ -579,7 +581,7 @@ def error413(e):
     ip = get_ip()
     clear_captcha_from_ip(ip)
     print(e)
-    return render_template("error.html", code=413,
+    return render_template("error.html", code=413, from_admin=check_admin(ip),
                            text="Извините, но прикреплённый файл оказался по размерам слишком крут "
                                 "и опасен для сервера, поэтому сервер подписал отказ в отправке.",
                            pics=PICS_413)
@@ -590,7 +592,7 @@ def error500(e):
     ip = get_ip()
     clear_captcha_from_ip(ip)
     print(e)
-    return render_template("error.html", code=500,
+    return render_template("error.html", code=500, from_admin=check_admin(ip),
                            text="По причинческим технинам сервер подписал отказ. "
                                 "Извините за доставленные неудобства.",
                            pics=["prichincheskaya_tehnina.png"])
