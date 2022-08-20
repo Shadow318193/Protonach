@@ -440,7 +440,6 @@ def admin_menu():
             return redirect("/admin")
 
 
-
 @app.route("/<board_name>", methods=['POST', 'GET'])
 def board_url(board_name):
     ip = get_ip()
@@ -472,7 +471,7 @@ def board_url(board_name):
             return render_template("board.html", board=board_obj, posts=posts, posts_count=posts.count(),
                                    post_answers=post_answers, post_media=post_media,
                                    post_media_type=post_media_type, post_media_name=post_media_name,
-                                   post_media_count=post_media_count,
+                                   post_media_count=post_media_count, accept_files_text=", ".join(ALLOWED_FILES),
                                    image_files=IMAGE_FILES, video_files=VIDEO_FILES,
                                    audio_files=AUDIO_FILES, accept_files=accept,
                                    captcha=f"/static/media/captchas/{captcha_for_ip[ip][0]}.png",
@@ -540,6 +539,7 @@ def post_url(board_name, post_id):
                                        post_media_name=post_media_name, post_media_count=post_media_count,
                                        posts_count=posts.count(), image_files=IMAGE_FILES, video_files=VIDEO_FILES,
                                        audio_files=AUDIO_FILES, accept_files=accept,
+                                       accept_files_text=", ".join(ALLOWED_FILES),
                                        captcha=f"/static/media/captchas/{captcha_for_ip[ip][0]}.png",
                                        from_admin=check_admin(ip), is_banned=check_ban(ip), zone=zone,
                                        message=session["message"] if "message" in session else "",
@@ -582,8 +582,8 @@ def error413(e):
     clear_captcha_from_ip(ip)
     print(e)
     return render_template("error.html", code=413, from_admin=check_admin(ip), is_banned=check_ban(ip),
-                           text="Извините, но прикреплённый файл оказался по размерам слишком крут "
-                                "и опасен для сервера, поэтому сервер подписал отказ в отправке.",
+                           text="Извините, но прикреплённые файлы оказались по размерам слишком круты "
+                                "и опасны для сервера, поэтому сервер подписал отказ в отправке.",
                            pics=PICS_413)
 
 

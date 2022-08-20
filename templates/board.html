@@ -43,6 +43,7 @@
                 </div>
                 <div class="form-group">
                     <label for="file[]">Приложите медиафайлы (Максимальный размер — {{ max_size }} МБ, максимум файлов — {{ max_count}})</label>
+                    <label for="file[]">Поддерживаемые типы файлов: {{ accept_files_text }}</label>
                     <input type=file class="form-control-file" id="file[]" name="file[]" multiple="multiple" accept="{{ accept_files }}">
                 </div>
                 <div class="form-group">
@@ -78,7 +79,7 @@
 
                     {% if from_admin %}
                         <form method="post">
-                            <div class="ms-2 me-auto">
+                            <div>
                                 <button type="submit" class="btn btn-orange" name="delete_post" value="{{ post.id }}">Удалить пост</button>
                                 <button type="submit" class="btn btn-orange" name="ban" value="{{ post.id }}">Забанить постера</button>
                             </div>
@@ -111,22 +112,24 @@
                     {% endif %}
 
                     {% if post_media[post.id] %}
+                    <div class="media">
                         {% for i in range(post_media_count[post.id]) %}
-
+                        <div class="aligncenter mediapadding">
                         [<i>{{ post_media_name[post.id][i] }}</i>]<br>
 
                         {% if post_media_type[post.id][i] in image_files %}
                             <a href="/static/media/from_users/{{ post_media[post.id][i] }}">
-                                <img src="/static/media/from_users/{{ post_media[post.id][i] }}" class="media" height="192"
+                                <img src="/static/media/from_users/{{ post_media[post.id][i] }}" height="96"
                                      alt="{{ post_media_name[post.id][i] }}">
-                            </a><br>
+                            </a>
                         {% elif post_media_type[post.id][i] in video_files %}
-                            <video controls src="/static/media/from_users/{{ post_media[post.id][i] }}" class="media" height="192"></video>
+                            <video controls src="/static/media/from_users/{{ post_media[post.id][i] }}" width="256"></video>
                         {% elif post_media_type[post.id][i] in audio_files %}
                             <audio controls src="/static/media/from_users/{{ post_media[post.id][i] }}"></audio>
                         {% endif %}
-                        <br>
+                        </div>
                         {% endfor %}
+                        </div><br>
                     {% endif %}
 
                     <div class="posttext">{{ post.text }}</div><br>

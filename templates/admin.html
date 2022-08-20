@@ -67,7 +67,7 @@
                         {% endif %}
                         {% if admin.admin_level < you %}
                         <form method="post">
-                            <div class="ms-2 me-auto">
+                            <div>
                                 <button type="submit" name="remove_admin" class="btn btn-orange" value="{{ admin.ip }}">Убрать админку</button>
                                 {% if admin.is_banned %}
                                 <button type="submit" name="unban" class="btn btn-orange" value="{{ admin.ip }}">Разбанить пользователя</button>
@@ -100,7 +100,7 @@
             <ol class="list-group">
                 {% for user in users %}
                 <li class="list-group-item d-flex justify-content-between align-items-start">
-                    <div class="ms-2 me-auto">
+                    <div>
                         {% if user.is_banned %}
                         <h1><s>{{ user.ip }}</s></h1>
                         {% else %}
