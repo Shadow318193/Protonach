@@ -10,6 +10,11 @@
           href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
           crossorigin="anonymous">
+    {% if dark_theme %}
+    <link rel="stylesheet" type="text/css" href="/static/css/stylesheet_dark.css">
+    {% else %}
+    <link rel="stylesheet" type="text/css" href="/static/css/stylesheet_light.css">
+    {% endif %}
     <link rel="stylesheet" type="text/css" href="/static/css/stylesheet.css">
 
     <title>Протонач</title>
@@ -19,8 +24,19 @@
 <body>
     <header>
 
-        <div class="alertwithoutround alert-info" role="alert">
+        <div class="alertwithoutround alert-1" role="alert">
             <h1 class="aligncenter">Протонач</h1>
+            <nav class="headercontent">
+                <form class="headerpadding" method="post">
+                    <button type="submit" name="theme" class="btn btn-1">
+                        {% if dark_theme %}
+                        Сменить на светлую тему
+                        {% else %}
+                        Сменить на тёмную тему
+                        {% endif %}
+                    </button>
+                </form>
+            </nav>
         </div>
 
     </header>
@@ -53,11 +69,15 @@
     </p>
 
     <p class="aligncenter">
+        {% if dark_theme %}
+        <img src="/static/media/eva.png">
+        {% else %}
         <img src="/static/media/anon.png">
+        {% endif %}
     </p>
 
     {% if from_admin and not is_banned %}
-    <div class="aligncenter"><a href="/admin"><button type="button" class="btn btn-orange"><h2>Меню админа</h2></button></a></div>
+    <div class="aligncenter"><a href="/admin"><button type="button" class="btn btn-1"><h2>Меню админа</h2></button></a></div>
     <br>
     {% endif %}
 
@@ -77,7 +97,7 @@
                     <a href="/{{ board.name }}">
                         <button type="button" class="list-group-item list-group-item-action">
                             <b>/{{ board.name }}/</b> — {{ board.full_name }}
-                            <span class="badge bg-orange rounded-pill whitetext">
+                            <span class="badge bg-1 rounded-pill whitetext">
                                 {% if posts[board.name] % 10 == 0 or posts[board.name] % 10 >= 5 or (11 <= posts[board.name] % 100 <= 19) %}
                                 {{ posts[board.name] }} постов
                                 {% elif posts[board.name] % 10 == 1 %}

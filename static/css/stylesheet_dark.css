@@ -1,0 +1,54 @@
+body {
+    background-color: #000011;
+    color: #ffffff;
+}
+
+.alert-1 {
+    color: #ffffff;
+    background-color: #45542d;
+    border: 1px solid #0c1d00;
+}
+
+.alert-2 {
+    color: #ffffff;
+    background-color: #ff8c28;
+    border: 1px solid #ee7b17;
+}
+
+.boardspadding {
+    padding: 10%;
+}
+
+.boardslist {
+    padding: 5%;
+    background-color: #45542d;
+    border: 1px solid #0c1d00;
+    color: #ffffff;
+}
+
+.bg-1 {
+    background-color: #6f4fa2;
+}
+
+.btn-1 {
+    color: #ffffff;
+    background-color: #6f4fa2;
+    border-color: #5b2b41;
+}
+
+.messagetext {
+    text-align: center;
+    color: #dd6622;
+}
+
+.postform {
+    margin-left: auto;
+    margin-right: auto;
+    min-width: 50%;
+    max-width: 75%;
+    background-color: #45542d;
+    border: 1px solid #0c1d00;
+    border-radius: 5px;
+    padding: 1%;
+    color: #ffffff;
+}

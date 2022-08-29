@@ -9,6 +9,11 @@
           href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
           crossorigin="anonymous">
+    {% if dark_theme %}
+    <link rel="stylesheet" type="text/css" href="/static/css/stylesheet_dark.css">
+    {% else %}
+    <link rel="stylesheet" type="text/css" href="/static/css/stylesheet_light.css">
+    {% endif %}
     <link rel="stylesheet" type="text/css" href="/static/css/stylesheet.css">
 
     <title>Протонач — /{{ board.name }}/, №{{ the_post.id }}</title>
@@ -18,17 +23,28 @@
 <body>
     <header>
 
-        <div class="alertwithoutround alert-info" role="alert">
-            <a href="/">
-                <h2>Протонач</h2>
-            </a>
+        <div class="alertwithoutround alert-1" role="alert">
+            <nav class="headercontent">
+                <a class="headerpadding" href="/">
+                    <img src="/static/media/favicon.png" height="64" alt="Лого">
+                </a>
+                <form class="headerpadding" method="post">
+                    <button type="submit" name="theme" class="btn btn-1">
+                        {% if dark_theme %}
+                        Сменить на светлую тему
+                        {% else %}
+                        Сменить на тёмную тему
+                        {% endif %}
+                    </button>
+                </form>
+            </nav>
             <h1 class="aligncenter">/{{ board.name }}/ — {{ board.full_name }}</h1>
             <h3 class="aligncenter">{{ board.about }}</h3>
             {% if from_admin and not is_banned %}
-                <div class="aligncenter"><a href="/admin"><button type="button" class="btn btn-orange"><h2>Меню админа</h2></button></a></div>
+                <div class="aligncenter"><a href="/admin"><button type="button" class="btn btn-1"><h2>Меню админа</h2></button></a></div>
                 <br>
             {% endif %}
-            <div class="aligncenter"><a href="/{{ board.name }}"><button type="button" class="btn btn-orange"><h2>Вернуться на главную страницу доски</h2></button></a></div>
+            <div class="aligncenter"><a href="/{{ board.name }}"><button type="button" class="btn btn-1"><h2>Вернуться на главную страницу доски</h2></button></a></div>
         </div>
 
     </header>
@@ -44,16 +60,16 @@
         <div class="postmargin">
 
             {% if the_post.poster == ip %}
-            <div class="alert alert-warning" role="alert">
+            <div class="alert alert-2" role="alert">
             {% else %}
-            <div class="alert alert-info" role="alert">
+            <div class="alert alert-1" role="alert">
                 {% endif %}
 
                 {% if from_admin %}
                     <form method="post">
                         <div>
-                            <button type="submit" name="delete_post" class="btn btn-orange" value="{{ the_post.id }}">Удалить пост</button>
-                            <button type="submit" name="ban" class="btn btn-orange" value="{{ the_post.id }}">Забанить постера</button>
+                            <button type="submit" name="delete_post" class="btn btn-1 adminbutton" value="{{ the_post.id }}">Удалить пост</button>
+                            <button type="submit" name="ban" class="btn btn-1 adminbutton" value="{{ the_post.id }}">Забанить постера</button>
                         </div>
                     </form>
                 {% endif %}
@@ -121,16 +137,16 @@
                     <div class="postmargin">
 
                         {% if post.poster == ip %}
-                        <div class="alert alert-warning" role="alert">
+                        <div class="alert alert-2" role="alert">
                         {% else %}
-                        <div class="alert alert-info" role="alert">
+                        <div class="alert alert-1" role="alert">
                             {% endif %}
 
                             {% if from_admin %}
                                 <form method="post">
                                     <div>
-                                        <button type="submit" name="delete_post" class="btn btn-orange" value="{{ post.id }}">Удалить пост</button>
-                                        <button type="submit" name="ban" class="btn btn-orange" value="{{ post.id }}">Забанить постера</button>
+                                        <button type="submit" name="delete_post" class="btn btn-1 adminbutton" value="{{ post.id }}">Удалить пост</button>
+                                        <button type="submit" name="ban" class="btn btn-1 adminbutton" value="{{ post.id }}">Забанить постера</button>
                                     </div>
                                 </form>
                             {% endif %}
@@ -223,7 +239,7 @@
                     <textarea class="form-control" id="captcha" rows="1" name="captcha"></textarea>
                 </div>
 
-                <button type="submit" class="btn btn-orange">Отправить</button>
+                <button type="submit" class="btn btn-1">Отправить</button>
             </form>
             <br>
 </body>

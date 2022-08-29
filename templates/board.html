@@ -9,6 +9,11 @@
           href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
           crossorigin="anonymous">
+    {% if dark_theme %}
+    <link rel="stylesheet" type="text/css" href="/static/css/stylesheet_dark.css">
+    {% else %}
+    <link rel="stylesheet" type="text/css" href="/static/css/stylesheet_light.css">
+    {% endif %}
     <link rel="stylesheet" type="text/css" href="/static/css/stylesheet.css">
 
     <title>Протонач — /{{ board.name }}/</title>
@@ -18,14 +23,25 @@
 <body>
     <header>
 
-        <div class="alertwithoutround alert-info" role="alert">
-            <a href="/">
-                <h2>Протонач</h2>
-            </a>
+        <div class="alertwithoutround alert-1" role="alert">
+            <nav class="headercontent">
+                <a class="headerpadding" href="/">
+                    <img src="/static/media/favicon.png" height="64" alt="Лого">
+                </a>
+                <form class="headerpadding" method="post">
+                    <button type="submit" name="theme" class="btn btn-1">
+                        {% if dark_theme %}
+                        Сменить на светлую тему
+                        {% else %}
+                        Сменить на тёмную тему
+                        {% endif %}
+                    </button>
+                </form>
+            </nav>
             <h1 class="aligncenter">/{{ board.name }}/ — {{ board.full_name }}</h1>
             <h3 class="aligncenter">{{ board.about }}</h3>
             {% if from_admin and not is_banned %}
-                <div class="aligncenter"><a href="/admin"><button type="button" class="btn btn-orange"><h2>Меню админа</h2></button></a></div>
+                <div class="aligncenter"><a href="/admin"><button type="button" class="btn btn-1"><h2>Меню админа</h2></button></a></div>
             {% endif %}
         </div>
 
@@ -52,7 +68,7 @@
                     <textarea class="form-control" id="captcha" rows="1" name="captcha"></textarea>
                 </div>
 
-                <button type="submit" class="btn btn-orange">Отправить</button>
+                <button type="submit" class="btn btn-1">Отправить</button>
             </form>
 
     {% if message %}
@@ -72,16 +88,16 @@
             <div class="postmargin">
 
                 {% if post.poster == ip %}
-                <div class="alert alert-warning" role="alert">
+                <div class="alert alert-2" role="alert">
                 {% else %}
-                <div class="alert alert-info" role="alert">
+                <div class="alert alert-1" role="alert">
                     {% endif %}
 
                     {% if from_admin %}
                         <form method="post">
                             <div>
-                                <button type="submit" class="btn btn-orange" name="delete_post" value="{{ post.id }}">Удалить пост</button>
-                                <button type="submit" class="btn btn-orange" name="ban" value="{{ post.id }}">Забанить постера</button>
+                                <button type="submit" class="btn btn-1 adminbutton" name="delete_post" value="{{ post.id }}">Удалить пост</button>
+                                <button type="submit" class="btn btn-1 adminbutton" name="ban" value="{{ post.id }}">Забанить постера</button>
                             </div>
                         </form>
                     {% endif %}
@@ -135,11 +151,11 @@
                     <div class="posttext">{{ post.text }}</div><br>
 
                     {% if post_answers[post.id] % 10 == 0 or post_answers[post.id] % 10 >= 5 or (11 <= post_answers[post.id] % 100 <= 19) %}
-                    <a href="/{{board.name}}/{{post.id}}"><button type="button" class="btn btn-orange">Войти в тред ({{ post_answers[post.id] }} ответов)</button></a>
+                    <a href="/{{board.name}}/{{post.id}}"><button type="button" class="btn btn-1">Войти в тред ({{ post_answers[post.id] }} ответов)</button></a>
                     {% elif post_answers[post.id] % 10 == 1 %}
-                    <a href="/{{board.name}}/{{post.id}}"><button type="button" class="btn btn-orange">Войти в тред ({{ post_answers[post.id] }} ответ)</button></a>
+                    <a href="/{{board.name}}/{{post.id}}"><button type="button" class="btn btn-1">Войти в тред ({{ post_answers[post.id] }} ответ)</button></a>
                     {% else %}
-                    <a href="/{{board.name}}/{{post.id}}"><button type="button" class="btn btn-orange">Войти в тред ({{ post_answers[post.id] }} ответа)</button></a>
+                    <a href="/{{board.name}}/{{post.id}}"><button type="button" class="btn btn-1">Войти в тред ({{ post_answers[post.id] }} ответа)</button></a>
                     {% endif %}
 
                 </div>

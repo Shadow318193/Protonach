@@ -10,6 +10,11 @@
           href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
           crossorigin="anonymous">
+    {% if dark_theme %}
+    <link rel="stylesheet" type="text/css" href="/static/css/stylesheet_dark.css">
+    {% else %}
+    <link rel="stylesheet" type="text/css" href="/static/css/stylesheet_light.css">
+    {% endif %}
     <link rel="stylesheet" type="text/css" href="/static/css/stylesheet.css">
 
     <title>Протонач</title>
@@ -19,10 +24,21 @@
 <body>
     <header>
 
-        <div class="alert alert-info" role="alert">
-            <a href="/">
-                <h2>Протонач</h2>
-            </a>
+        <div class="alertwithoutround alert-1" role="alert">
+            <nav class="headercontent">
+                <a class="headerpadding" href="/">
+                    <img src="/static/media/favicon.png" height="64" alt="Лого">
+                </a>
+                <form class="headerpadding" method="post">
+                    <button type="submit" name="theme" class="btn btn-1">
+                            {% if dark_theme %}
+                            Сменить на светлую тему
+                            {% else %}
+                            Сменить на тёмную тему
+                            {% endif %}
+                    </button>
+                </form>
+            </nav>
             <h1 class="aligncenter">Меню админов</h1>
         </div>
 
@@ -80,7 +96,7 @@
                         <b>Действия с этим админом для вас запрещены.</b>
                         {% endif %}
                     </div>
-                    <span class="badge bg-orange rounded-pill whitetext">{{ admin.admin_level }} уровень админки</span>
+                    <span class="badge bg-1 rounded-pill whitetext">{{ admin.admin_level }} уровень админки</span>
                 </li>
                 {% endfor %}
             </ol>
@@ -109,9 +125,9 @@
                         <form method="post">
                             <div class="ms-2 me-auto">
                                 {% if user.is_banned %}
-                                <button type="submit" name="unban" class="btn btn-orange" value="{{ user.ip }}">Разбанить пользователя</button>
+                                <button type="submit" name="unban" class="btn btn-1" value="{{ user.ip }}">Разбанить пользователя</button>
                                 {% else %}
-                                <button type="submit" name="ban" class="btn btn-orange" value="{{ user.ip }}">Забанить пользователя</button>
+                                <button type="submit" name="ban" class="btn btn-1" value="{{ user.ip }}">Забанить пользователя</button>
                                 {% endif %}
                             </div>
                         </form>

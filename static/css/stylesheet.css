@@ -2,61 +2,39 @@
     text-align: center;
 }
 
+.headercontent {
+    display: flex;
+    overflow: auto;
+}
+
+.headerpadding {
+    padding-right: 2%;
+}
+
 .alertwithoutround {
   position: relative;
   padding: 0.75rem 1.25rem;
   margin-bottom: 1rem;
-  border: 1px solid #bee5eb;
 }
 
 .boardspadding {
-    padding: 15%;
-}
-
-.boardslist {
-    padding: 5%;
-    background-color: #d1ecf1;
-    border: 1px solid #bee5eb;
-    color: #0c5460;
+    padding: 10%;
 }
 
 .whitetext {
     color: #ffffff;
 }
 
-.bg-orange {
-    background-color: #fd7e14;
-}
-
-.btn-orange {
-    color: #fff;
-    background-color: #fd7e14;
-    border-color: #fd7e14;
-}
-
-.messagetext {
-    text-align: center;
-    color: #bb4400;
-}
-
 .childpost {
     padding-left: 10%;
 }
 
-.postmargin {
-    margin-bottom: 2%;
+.logo {
+    padding-left: 2%;
 }
 
-.postform {
-    margin-left: auto;
-    margin-right: auto;
-    min-width: 50%;
-    max-width: 75%;
-    background-color: #d1ecf1;
-    border: 1px solid #bee5eb;
-    border-radius: 5px;
-    padding: 1%;
-    color: #0c5460;
+.postmargin {
+    margin-bottom: 2%;
 }
 
 .posttext {
@@ -67,8 +45,15 @@
     max-width: 100%;
     max-height: 100%;
     overflow: auto;
+    display: flex;
+    flex-flow: row wrap;
 }
 
 .mediapadding {
     padding-right: 5px;
+    padding-top: 1px;
+}
+
+.adminbutton {
+    margin-bottom: 1%
 }

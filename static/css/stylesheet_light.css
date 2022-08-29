@@ -1,0 +1,45 @@
+.alert-1 {
+    color: #0c5460;
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+}
+
+.alert-2 {
+    color: #856404;
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+}
+
+.boardslist {
+    padding: 5%;
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+}
+
+.bg-1 {
+    background-color: #fd7e14;
+}
+
+.btn-1 {
+    color: #fff;
+    background-color: #fd7e14;
+    border-color: #fd7e14;
+}
+
+.messagetext {
+    text-align: center;
+    color: #bb4400;
+}
+
+.postform {
+    margin-left: auto;
+    margin-right: auto;
+    min-width: 50%;
+    max-width: 75%;
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+    border-radius: 5px;
+    padding: 1%;
+    color: #0c5460;
+}

@@ -9,6 +9,11 @@
           href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
           crossorigin="anonymous">
+    {% if dark_theme %}
+    <link rel="stylesheet" type="text/css" href="/static/css/stylesheet_dark.css">
+    {% else %}
+    <link rel="stylesheet" type="text/css" href="/static/css/stylesheet_light.css">
+    {% endif %}
     <link rel="stylesheet" type="text/css" href="/static/css/stylesheet.css">
 
     <title>Протонач</title>
@@ -18,13 +23,15 @@
 <body>
     <header>
 
-        <div class="alertwithoutround alert-info" role="alert">
-            <a href="/">
-                <h1 class="aligncenter">Протонач</h1>
-            </a>
-            {% if from_admin and not is_banned %}
-                <div class="aligncenter"><a href="/admin"><button type="button" class="btn btn-orange"><h2>Меню админа</h2></button></a></div>
-            {% endif %}
+        <div class="alertwithoutround alert-1" role="alert">
+            <nav class="headercontent">
+                <a href="/">
+                    <img src="/static/media/favicon.png" height="64" alt="Лого">
+                </a>
+                {% if from_admin and not is_banned %}
+                    <div class="aligncenter"><a href="/admin"><button type="button" class="btn btn-1"><h2>Меню админа</h2></button></a></div>
+                {% endif %}
+            </nav>
         </div>
 
     </header>

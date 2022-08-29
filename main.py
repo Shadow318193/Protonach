@@ -31,6 +31,7 @@ AUDIO_FILES = ["mp3", "wav"]
 PICS_403 = ["gandalf.jpg"]
 PICS_404 = ["mario.gif"]
 PICS_413 = ["too_cool_and_dangerous.gif", "over9000.png"]
+PICS_500 = ["prichincheskaya_tehnina.png"]
 
 CAPTCHA_MIN_TIME = 5
 
@@ -122,11 +123,23 @@ def clear_cookies():
         session.pop("text")
 
 
+def check_theme():
+    if "dark_theme" not in session:
+        session["dark_theme"] = False
+
+
 def post_method(ip, form, files, board_name, post_id=None):
     if post_id == None:
         link = board_name
     else:
         link = post_id
+
+    if "theme" in form:
+        if session["dark_theme"]:
+            session["dark_theme"] = False
+        else:
+            session["dark_theme"] = True
+        return link
 
     if check_ban(ip):
         session["message"] = "Доброго времени суток. C вашего IP больше нельзя постить, потому что там " \
@@ -337,19 +350,28 @@ def post_method(ip, form, files, board_name, post_id=None):
         return link
 
 
-@app.route("/")
+@app.route("/", methods=['POST', 'GET'])
 def index():
-    ip = get_ip()
-    if "message" in session:
-        session.pop("message")
-    clear_captcha_from_ip(ip)
-    db_sess = db_session.create_session()
-    boards = db_sess.query(Boards)
-    posts = {}
-    for board in boards:
-        posts[board.name] = db_sess.query(Posts).filter(Posts.board_name == board.name).count()
-    return render_template("index.html", boards=boards, boards_count=boards.count(), posts=posts,
-                           from_admin=check_admin(ip), is_banned=check_ban(ip))
+    if request.method == "GET":
+        ip = get_ip()
+        if "message" in session:
+            session.pop("message")
+        check_theme()
+        clear_captcha_from_ip(ip)
+        db_sess = db_session.create_session()
+        boards = db_sess.query(Boards)
+        posts = {}
+        for board in boards:
+            posts[board.name] = db_sess.query(Posts).filter(Posts.board_name == board.name).count()
+        return render_template("index.html", boards=boards, boards_count=boards.count(), posts=posts,
+                               from_admin=check_admin(ip), is_banned=check_ban(ip), dark_theme=session["dark_theme"])
+    elif request.method == "POST":
+        if "theme" in request.form:
+            if session["dark_theme"]:
+                session["dark_theme"] = False
+            else:
+                session["dark_theme"] = True
+            return redirect("/")
 
 
 @app.route("/robots.txt")
@@ -365,6 +387,7 @@ def robots():
 def admin_menu():
     ip = get_ip()
     clear_captcha_from_ip(ip)
+    check_theme()
 
     if request.method == "GET":
         if check_admin(ip) and not check_ban(ip):
@@ -373,12 +396,19 @@ def admin_menu():
             users = db_sess.query(Users).filter(Users.admin_level == 0)
             return render_template("admin.html", admins=admins, admins_count=admins.count(),
                                    users=users, users_count=users.count(), you=check_admin(ip),
-                                   message=session["message"] if "message" in session else "")
+                                   message=session["message"] if "message" in session else "",
+                                   dark_theme=session["dark_theme"])
         else:
             return abort(403)
 
     elif request.method == "POST":
         if check_admin(ip) and not check_ban(ip):
+            if "theme" in request.form:
+                if session["dark_theme"]:
+                    session["dark_theme"] = False
+                else:
+                    session["dark_theme"] = True
+                return redirect("/admin")
             if "ban" in request.form:
                 db_sess = db_session.create_session()
                 user = db_sess.query(Users).filter(Users.ip == request.form["ban"])
@@ -443,6 +473,7 @@ def admin_menu():
 @app.route("/<board_name>", methods=['POST', 'GET'])
 def board_url(board_name):
     ip = get_ip()
+    check_theme()
 
     if request.method == 'GET':
         generate_new_captcha(ip)
@@ -480,7 +511,7 @@ def board_url(board_name):
                                    topic=session["topic"] if "topic" in session else "",
                                    text=session["text"] if "text" in session else "", ip=ip,
                                    max_size=app.config['MAX_CONTENT_LENGTH'] // (1024 * 1024),
-                                   max_count=MAX_MEDIA_COUNT)
+                                   max_count=MAX_MEDIA_COUNT, dark_theme=session["dark_theme"])
 
         return abort(404)
     elif request.method == 'POST':
@@ -493,6 +524,7 @@ def board_url(board_name):
 @app.route("/<board_name>/<post_id>", methods=['POST', 'GET'])
 def post_url(board_name, post_id):
     ip = get_ip()
+    check_theme()
 
     if request.method == 'GET':
         generate_new_captcha(ip)
@@ -546,7 +578,7 @@ def post_url(board_name, post_id):
                                        topic=session["topic"] if "topic" in session else "",
                                        text=session["text"] if "text" in session else "", ip=ip,
                                        max_size=app.config['MAX_CONTENT_LENGTH'] // (1024 * 1024),
-                                       max_count=MAX_MEDIA_COUNT)
+                                       max_count=MAX_MEDIA_COUNT, dark_theme=session["dark_theme"])
 
         return abort(404)
     elif request.method == 'POST':
@@ -559,6 +591,7 @@ def post_url(board_name, post_id):
 @app.errorhandler(403)
 def error404(e):
     ip = get_ip()
+    check_theme()
     clear_captcha_from_ip(ip)
     print(e)
     return render_template("error.html", code=403, from_admin=check_admin(ip), is_banned=check_ban(ip),
@@ -569,6 +602,7 @@ def error404(e):
 @app.errorhandler(404)
 def error404(e):
     ip = get_ip()
+    check_theme()
     clear_captcha_from_ip(ip)
     print(e)
     return render_template("error.html", code=404, from_admin=check_admin(ip), is_banned=check_ban(ip),
@@ -579,6 +613,7 @@ def error404(e):
 @app.errorhandler(413)
 def error413(e):
     ip = get_ip()
+    check_theme()
     clear_captcha_from_ip(ip)
     print(e)
     return render_template("error.html", code=413, from_admin=check_admin(ip), is_banned=check_ban(ip),
@@ -590,12 +625,13 @@ def error413(e):
 @app.errorhandler(500)
 def error500(e):
     ip = get_ip()
+    check_theme()
     clear_captcha_from_ip(ip)
     print(e)
     return render_template("error.html", code=500, from_admin=check_admin(ip), is_banned=check_ban(ip),
                            text="По причинческим технинам сервер подписал отказ. "
                                 "Извините за доставленные неудобства.",
-                           pics=["prichincheskaya_tehnina.png"])
+                           pics=PICS_500)
 
 
 print(admin_password)
