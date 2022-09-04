@@ -26,7 +26,7 @@
         <div class="alertwithoutround alert-1" role="alert">
             <nav class="headercontent">
                 <a class="headerpadding" href="/">
-                    <img src="/static/media/favicon.png" height="64" alt="Лого">
+                    <img src="/static/media/favicon.png" height="64" alt="Лого" title="Протонач">
                 </a>
                 <form class="headerpadding" method="post">
                     <button type="submit" name="theme" class="btn btn-1">
@@ -105,7 +105,7 @@
                     Аноним, {{ post.time_to_show }} {{ zone }}, <b>№{{ post.id }}</b>
 
                         <form method="post">
-                            <button type="submit" name="like" value="{{ post.id }}" class="badge bg-success rounded-pill">
+                            <button type="submit" name="like" value="{{ post.id }}" class="badge bg-success rounded-pill" title="Этот хорош">
                                 {% if ip not in post.raters_like %}
                                 <img src="/static/media/like.png">
                                 {% else %}
@@ -113,7 +113,7 @@
                                 {% endif %}
                                 <div class="whitetext">{{ post.likes }}</div>
                             </button>
-                            <button type="submit" name="dislike" value="{{ post.id }}" class="badge bg-danger rounded-pill">
+                            <button type="submit" name="dislike" value="{{ post.id }}" class="badge bg-danger rounded-pill" title="ЭТО ЧТО ЗА ХРЕНЬ?!">
                                 {% if ip not in post.raters_dislike %}
                                 <img src="/static/media/dislike.png">
                                 {% else %}
@@ -150,14 +150,16 @@
 
                     <div class="posttext">{{ post.text }}</div><br>
 
-                    {% if post_answers[post.id] % 10 == 0 or post_answers[post.id] % 10 >= 5 or (11 <= post_answers[post.id] % 100 <= 19) %}
-                    <a href="/{{board.name}}/{{post.id}}"><button type="button" class="btn btn-1">Войти в тред ({{ post_answers[post.id] }} ответов)</button></a>
-                    {% elif post_answers[post.id] % 10 == 1 %}
-                    <a href="/{{board.name}}/{{post.id}}"><button type="button" class="btn btn-1">Войти в тред ({{ post_answers[post.id] }} ответ)</button></a>
-                    {% else %}
-                    <a href="/{{board.name}}/{{post.id}}"><button type="button" class="btn btn-1">Войти в тред ({{ post_answers[post.id] }} ответа)</button></a>
-                    {% endif %}
 
+                    <a href="/{{board.name}}/{{post.id}}"><button type="button" class="btn btn-1">
+                        {% if post_answers[post.id] % 10 == 0 or post_answers[post.id] % 10 >= 5 or (11 <= post_answers[post.id] % 100 <= 19) %}
+                        Войти в тред ({{ post_answers[post.id] }} ответов)
+                        {% elif post_answers[post.id] % 10 == 1 %}
+                        Войти в тред ({{ post_answers[post.id] }} ответ)
+                        {% else %}
+                        Войти в тред ({{ post_answers[post.id] }} ответа)
+                        {% endif %}
+                    </button></a>
                 </div>
 
                 {% endfor %}
