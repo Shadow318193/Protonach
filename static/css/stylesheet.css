@@ -25,6 +25,10 @@
     color: #ffffff;
 }
 
+.redtext {
+    color: #ff0000;
+}
+
 .childpost {
     padding-left: 10%;
 }

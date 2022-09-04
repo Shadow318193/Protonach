@@ -64,36 +64,36 @@
 
         <div class="boardslist">
 
-            <h1 class="colortext">
+            <h1>
                 Админы:
             </h1>
 
             <ol class="list-group">
                 {% for admin in admins %}
                 <li class="list-group-item d-flex justify-content-between align-items-start">
-                    <div class="ms-2 me-auto">
+                    <div>
                         {% if admin.is_banned and admin.admin_level >= you %}
-                        <h1><s style="color: #ff0000">{{ admin.ip }}</s></h1>
+                        <h1><s class="redtext">{{ admin.ip }}</s></h1>
                         {% elif admin.admin_level >= you %}
-                        <h1 style="color: #ff0000">{{ admin.ip }}</h1>
+                        <h1 class="redtext">{{ admin.ip }}</h1>
                         {% elif admin.is_banned %}
-                        <h1><s>{{ admin.ip }}</s></h1>
+                        <h1><s class="text-1">{{ admin.ip }}</s></h1>
                         {% else %}
-                        <h1>{{ admin.ip }}</h1>
+                        <h1 class="text-1">{{ admin.ip }}</h1>
                         {% endif %}
                         {% if admin.admin_level < you %}
                         <form method="post">
                             <div>
-                                <button type="submit" name="remove_admin" class="btn btn-orange" value="{{ admin.ip }}">Убрать админку</button>
+                                <button type="submit" name="remove_admin" class="btn btn-1" value="{{ admin.ip }}">Убрать админку</button>
                                 {% if admin.is_banned %}
-                                <button type="submit" name="unban" class="btn btn-orange" value="{{ admin.ip }}">Разбанить пользователя</button>
+                                <button type="submit" name="unban" class="btn btn-1" value="{{ admin.ip }}">Разбанить пользователя</button>
                                 {% else %}
-                                <button type="submit" name="ban" class="btn btn-orange" value="{{ admin.ip }}">Забанить пользователя</button>
+                                <button type="submit" name="ban" class="btn btn-1" value="{{ admin.ip }}">Забанить пользователя</button>
                                 {% endif %}
                             </div>
                         </form>
                         {% else %}
-                        <b>Действия с этим админом для вас запрещены.</b>
+                        <b class="text-1">Действия с этим админом для вас запрещены.</b>
                         {% endif %}
                     </div>
                     <span class="badge bg-1 rounded-pill whitetext">{{ admin.admin_level }} уровень админки</span>
