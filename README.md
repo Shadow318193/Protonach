@@ -19,4 +19,4 @@ A simple anonymous imageboard where you can post videos and music too.
 - I should fix some bugs and remake GUI of the site, so it will take a lot of time.
 >Can I try it?
 
-- Yes! You can visit http://shadow318193.pythonanywhere.com to see the current result of work.
+- Yes, but you have to run the code on your machine.
